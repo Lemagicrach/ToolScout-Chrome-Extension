@@ -336,6 +336,28 @@
             margin-top: 6px;
             font-style: italic;
         }
+
+        /* New CSS classes to replace inline styles */
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .save-notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -349,7 +371,7 @@
             <!-- Amazon Affiliate & OneLink Settings -->
             <div class="section">
                 <div class="section-header">
-                    <span style="font-size: 24px;">🔗</span>
+                    <span class="section-icon">🔗</span>
                     <div>
                         <div class="section-title">Amazon Affiliate & OneLink</div>
                     </div>
@@ -358,43 +380,63 @@
                     Configure how affiliate links are generated and handle international Amazon redirections.
                 </div>
 
-                <div class="form-group">
-                    <label>OneLink Redirection Behavior</label>
-                    <div class="radio-group">
+                <fieldset class="form-group">
+                    <legend>OneLink Redirection Behavior</legend>
+                    <div class="radio-group" role="radiogroup" aria-labelledby="onelink-behavior-legend">
                         <div class="radio-item" data-value="auto">
-                            <input type="radio" name="onelink-behavior" value="auto" id="onelink-auto" checked>
-                            <div>
+                            <input type="radio" 
+                                   name="onelink-behavior" 
+                                   value="auto" 
+                                   id="onelink-auto" 
+                                   checked
+                                   aria-describedby="onelink-auto-desc">
+                            <label for="onelink-auto">
                                 <div class="checkbox-title">🌍 Auto-Redirect (Recommended)</div>
-                                <div class="checkbox-description">Automatically redirect to user's local Amazon store based on location</div>
-                            </div>
+                                <div class="checkbox-description" id="onelink-auto-desc">Automatically redirect to user's local Amazon store based on location</div>
+                            </label>
                         </div>
                         <div class="radio-item" data-value="ask">
-                            <input type="radio" name="onelink-behavior" value="ask" id="onelink-ask">
-                            <div>
+                            <input type="radio" 
+                                   name="onelink-behavior" 
+                                   value="ask" 
+                                   id="onelink-ask"
+                                   aria-describedby="onelink-ask-desc">
+                            <label for="onelink-ask">
                                 <div class="checkbox-title">❓ Ask Every Time</div>
-                                <div class="checkbox-description">Show a popup to choose Amazon region for each product</div>
-                            </div>
+                                <div class="checkbox-description" id="onelink-ask-desc">Show a popup to choose Amazon region for each product</div>
+                            </label>
                         </div>
                         <div class="radio-item" data-value="fixed">
-                            <input type="radio" name="onelink-behavior" value="fixed" id="onelink-fixed">
-                            <div>
+                            <input type="radio" 
+                                   name="onelink-behavior" 
+                                   value="fixed" 
+                                   id="onelink-fixed"
+                                   aria-describedby="onelink-fixed-desc">
+                            <label for="onelink-fixed">
                                 <div class="checkbox-title">📍 Fixed Region</div>
-                                <div class="checkbox-description">Always use a specific Amazon region</div>
-                            </div>
+                                <div class="checkbox-description" id="onelink-fixed-desc">Always use a specific Amazon region</div>
+                            </label>
                         </div>
                         <div class="radio-item" data-value="disabled">
-                            <input type="radio" name="onelink-behavior" value="disabled" id="onelink-disabled">
-                            <div>
+                            <input type="radio" 
+                                   name="onelink-behavior" 
+                                   value="disabled" 
+                                   id="onelink-disabled"
+                                   aria-describedby="onelink-disabled-desc">
+                            <label for="onelink-disabled">
                                 <div class="checkbox-title">🚫 Disabled</div>
-                                <div class="checkbox-description">Use original Amazon links without redirection</div>
-                            </div>
+                                <div class="checkbox-description" id="onelink-disabled-desc">Use original Amazon links without redirection</div>
+                            </label>
                         </div>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="form-group" id="fixed-region-group" style="display: none;">
+                <div class="form-group hidden" id="fixed-region-group">
                     <label for="preferred-region">Preferred Amazon Region</label>
-                    <select class="form-control" id="preferred-region">
+                    <select class="form-control" 
+                            id="preferred-region"
+                            title="Select your preferred Amazon marketplace"
+                            aria-describedby="region-help">
                         <option value="amazon.com">🇺🇸 Amazon US</option>
                         <option value="amazon.co.uk">🇬🇧 Amazon UK</option>
                         <option value="amazon.de">🇩🇪 Amazon Germany</option>
@@ -405,6 +447,7 @@
                         <option value="amazon.com.au">🇦🇺 Amazon Australia</option>
                         <option value="amazon.co.jp">🇯🇵 Amazon Japan</option>
                     </select>
+                    <div class="help-text" id="region-help">This region will be used for all Amazon affiliate links</div>
                 </div>
 
                 <div class="alert alert-info">
@@ -412,8 +455,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Your Amazon Affiliate Tags by Region</label>
-                    <div class="affiliate-tags" id="affiliate-tags">
+                    <label id="affiliate-tags-label">Your Amazon Affiliate Tags by Region</label>
+                    <div class="affiliate-tags" 
+                         id="affiliate-tags"
+                         role="group"
+                         aria-labelledby="affiliate-tags-label">
                         <!-- Will be populated by JavaScript -->
                     </div>
                     <div class="help-text">
@@ -425,7 +471,7 @@
             <!-- Retailer Integration Settings -->
             <div class="section">
                 <div class="section-header">
-                    <span style="font-size: 24px;">🏪</span>
+                    <span class="section-icon">🪀</span>
                     <div>
                         <div class="section-title">Retailer Integration</div>
                     </div>
@@ -434,65 +480,81 @@
                     Choose which retailers to include in price comparisons and affiliate programs.
                 </div>
 
-                <div class="form-group">
-                    <label>Enabled Affiliate Programs</label>
+                <fieldset class="form-group">
+                    <legend>Enabled Affiliate Programs</legend>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="enable-amazon" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="enable-amazon" 
+                                   checked
+                                   aria-describedby="amazon-desc">
+                            <label for="enable-amazon" class="checkbox-label">
                                 <div class="checkbox-title">🛒 Amazon Affiliate Program</div>
-                                <div class="checkbox-description">Show "View on Amazon" buttons with your affiliate links</div>
-                            </div>
+                                <div class="checkbox-description" id="amazon-desc">Show "View on Amazon" buttons with your affiliate links</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="enable-homedepot">
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="enable-homedepot"
+                                   aria-describedby="homedepot-desc">
+                            <label for="enable-homedepot" class="checkbox-label">
                                 <div class="checkbox-title">🏠 Home Depot (Click Tracking)</div>
-                                <div class="checkbox-description">Track clicks to Home Depot for analytics (no affiliate program)</div>
-                            </div>
+                                <div class="checkbox-description" id="homedepot-desc">Track clicks to Home Depot for analytics (no affiliate program)</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="enable-lowes">
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="enable-lowes"
+                                   aria-describedby="lowes-desc">
+                            <label for="enable-lowes" class="checkbox-label">
                                 <div class="checkbox-title">🔨 Lowes (Future Support)</div>
-                                <div class="checkbox-description">Coming soon - Lowes price comparisons</div>
-                            </div>
+                                <div class="checkbox-description" id="lowes-desc">Coming soon - Lowes price comparisons</div>
+                            </label>
                         </div>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="form-group">
-                    <label>Price Comparison Settings</label>
+                <fieldset class="form-group">
+                    <legend>Price Comparison Settings</legend>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="show-savings" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="show-savings" 
+                                   checked
+                                   aria-describedby="savings-desc">
+                            <label for="show-savings" class="checkbox-label">
                                 <div class="checkbox-title">💰 Show Savings Amount</div>
-                                <div class="checkbox-description">Display how much you can save with each retailer</div>
-                            </div>
+                                <div class="checkbox-description" id="savings-desc">Display how much you can save with each retailer</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="highlight-best-deal" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="highlight-best-deal" 
+                                   checked
+                                   aria-describedby="highlight-desc">
+                            <label for="highlight-best-deal" class="checkbox-label">
                                 <div class="checkbox-title">⭐ Highlight Best Deals</div>
-                                <div class="checkbox-description">Visually emphasize the retailer with the best price</div>
-                            </div>
+                                <div class="checkbox-description" id="highlight-desc">Visually emphasize the retailer with the best price</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="cache-prices" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="cache-prices" 
+                                   checked
+                                   aria-describedby="cache-desc">
+                            <label for="cache-prices" class="checkbox-label">
                                 <div class="checkbox-title">⚡ Cache Price Data</div>
-                                <div class="checkbox-description">Store price comparisons for faster loading (5 minute cache)</div>
-                            </div>
+                                <div class="checkbox-description" id="cache-desc">Store price comparisons for faster loading (5 minute cache)</div>
+                            </label>
                         </div>
                     </div>
-                </div>
+                </fieldset>
             </div>
 
             <!-- Privacy & Analytics -->
             <div class="section">
                 <div class="section-header">
-                    <span style="font-size: 24px;">🔒</span>
+                    <span class="section-icon">🔒</span>
                     <div>
                         <div class="section-title">Privacy & Analytics</div>
                     </div>
@@ -501,40 +563,51 @@
                     Control data collection and privacy settings. All data is stored locally on your device.
                 </div>
 
-                <div class="form-group">
-                    <label>Data Collection Settings</label>
+                <fieldset class="form-group">
+                    <legend>Data Collection Settings</legend>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="track-clicks" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="track-clicks" 
+                                   checked
+                                   aria-describedby="track-clicks-desc">
+                            <label for="track-clicks" class="checkbox-label">
                                 <div class="checkbox-title">📊 Track Affiliate Clicks</div>
-                                <div class="checkbox-description">Store anonymous click data locally for analytics (helps improve the extension)</div>
-                            </div>
+                                <div class="checkbox-description" id="track-clicks-desc">Store anonymous click data locally for analytics (helps improve the extension)</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="store-search-history">
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="store-search-history"
+                                   aria-describedby="search-history-desc">
+                            <label for="store-search-history" class="checkbox-label">
                                 <div class="checkbox-title">🔍 Store Product Search History</div>
-                                <div class="checkbox-description">Remember products you've viewed for faster comparisons</div>
-                            </div>
+                                <div class="checkbox-description" id="search-history-desc">Remember products you've viewed for faster comparisons</div>
+                            </label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="anonymous-usage" checked>
-                            <div class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="anonymous-usage" 
+                                   checked
+                                   aria-describedby="anonymous-usage-desc">
+                            <label for="anonymous-usage" class="checkbox-label">
                                 <div class="checkbox-title">📈 Anonymous Usage Statistics</div>
-                                <div class="checkbox-description">Help improve ToolScout with anonymous usage data</div>
-                            </div>
+                                <div class="checkbox-description" id="anonymous-usage-desc">Help improve ToolScout with anonymous usage data</div>
+                            </label>
                         </div>
                     </div>
-                </div>
+                </fieldset>
 
                 <div class="alert alert-warning">
                     <strong>Privacy Notice:</strong> All data is stored locally on your device. We never send personal information to external servers or share data with third parties.
                 </div>
 
                 <div class="form-group">
-                    <label>Your Analytics Summary (Last 30 Days)</label>
-                    <div class="analytics-stats" id="analytics-stats">
+                    <label id="analytics-label">Your Analytics Summary (Last 30 Days)</label>
+                    <div class="analytics-stats" 
+                         id="analytics-stats"
+                         role="group"
+                         aria-labelledby="analytics-label">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
@@ -543,7 +616,7 @@
             <!-- Advanced Settings -->
             <div class="section">
                 <div class="section-header">
-                    <span style="font-size: 24px;">⚡</span>
+                    <span class="section-icon">⚡</span>
                     <div>
                         <div class="section-title">Advanced Settings</div>
                     </div>
@@ -554,41 +627,65 @@
 
                 <div class="form-group">
                     <label for="price-alert-threshold">Price Alert Threshold (%)</label>
-                    <input type="number" class="form-control" id="price-alert-threshold" min="1" max="50" value="10">
-                    <div class="help-text">Minimum price drop percentage to trigger alerts</div>
+                    <input type="number" 
+                           class="form-control" 
+                           id="price-alert-threshold" 
+                           min="1" 
+                           max="50" 
+                           value="10"
+                           title="Minimum price drop percentage to trigger alerts"
+                           aria-describedby="threshold-help">
+                    <div class="help-text" id="threshold-help">Minimum price drop percentage to trigger alerts</div>
                 </div>
 
                 <div class="form-group">
                     <label for="cache-duration">Price Cache Duration (minutes)</label>
-                    <select class="form-control" id="cache-duration">
+                    <select class="form-control" 
+                            id="cache-duration"
+                            title="How long to cache price comparison data"
+                            aria-describedby="cache-help">
                         <option value="1">1 minute</option>
                         <option value="5" selected>5 minutes</option>
                         <option value="15">15 minutes</option>
                         <option value="30">30 minutes</option>
                         <option value="60">1 hour</option>
                     </select>
+                    <div class="help-text" id="cache-help">How long to store price comparison data for faster loading</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Default Currency</label>
-                    <select class="form-control" id="default-currency">
+                    <label for="default-currency">Default Currency</label>
+                    <select class="form-control" 
+                            id="default-currency"
+                            title="Default currency for price display"
+                            aria-describedby="currency-help">
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
                         <option value="GBP">GBP (£)</option>
                         <option value="CAD">CAD (C$)</option>
                         <option value="AUD">AUD (A$)</option>
                     </select>
+                    <div class="help-text" id="currency-help">Currency format for displaying prices</div>
                 </div>
             </div>
         </div>
 
         <div class="button-group">
-            <button class="btn btn-secondary" id="reset-button">Reset to Defaults</button>
-            <button class="btn btn-primary" id="save-button">Save Settings</button>
+            <button class="btn btn-secondary" 
+                    id="reset-button"
+                    type="button"
+                    title="Reset all settings to their default values">Reset to Defaults</button>
+            <button class="btn btn-primary" 
+                    id="save-button"
+                    type="button"
+                    title="Save your current settings">Save Settings</button>
         </div>
     </div>
 
-    <div id="save-notification" style="display: none; position: fixed; top: 20px; right: 20px; background: var(--success-color); color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;">
+    <div id="save-notification" 
+         class="save-notification"
+         role="status"
+         aria-live="polite">
         ✅ Settings saved successfully!
     </div>
 
@@ -642,21 +739,55 @@
 
             async loadSettings() {
                 try {
+                    // Check if Chrome extension APIs are available
+                    if (typeof chrome === 'undefined' || !chrome.storage) {
+                        console.warn('Chrome extension APIs not available. Using localStorage fallback.');
+                        this.loadSettingsFromLocalStorage();
+                        return;
+                    }
+
                     const result = await chrome.storage.sync.get('toolscoutSettings');
                     this.settings = { ...this.defaultSettings, ...(result.toolscoutSettings || {}) };
                 } catch (error) {
                     console.error('Error loading settings:', error);
+                    this.loadSettingsFromLocalStorage();
+                }
+            }
+
+            loadSettingsFromLocalStorage() {
+                try {
+                    const stored = localStorage.getItem('toolscoutSettings');
+                    this.settings = stored ? 
+                        { ...this.defaultSettings, ...JSON.parse(stored) } : 
+                        this.defaultSettings;
+                } catch (error) {
+                    console.error('LocalStorage fallback failed:', error);
                     this.settings = this.defaultSettings;
                 }
             }
 
             async saveSettings() {
                 try {
+                    // Check if Chrome extension APIs are available
+                    if (typeof chrome === 'undefined' || !chrome.storage) {
+                        console.warn('Chrome extension APIs not available. Using localStorage fallback.');
+                        localStorage.setItem('toolscoutSettings', JSON.stringify(this.settings));
+                        this.showNotification('Settings saved to local storage!', 'success');
+                        return;
+                    }
+
                     await chrome.storage.sync.set({ toolscoutSettings: this.settings });
                     this.showNotification('Settings saved successfully!', 'success');
                 } catch (error) {
                     console.error('Error saving settings:', error);
-                    this.showNotification('Error saving settings', 'error');
+                    // Fallback to localStorage
+                    try {
+                        localStorage.setItem('toolscoutSettings', JSON.stringify(this.settings));
+                        this.showNotification('Settings saved to local storage (fallback)', 'info');
+                    } catch (localError) {
+                        console.error('LocalStorage fallback failed:', localError);
+                        this.showNotification('Error saving settings', 'error');
+                    }
                 }
             }
 
@@ -676,6 +807,7 @@
                 // Affiliate programs
                 document.getElementById('enable-amazon').checked = this.settings.affiliate.enabledPrograms.includes('amazon');
                 document.getElementById('enable-homedepot').checked = this.settings.affiliate.enabledPrograms.includes('homedepot');
+                document.getElementById('enable-lowes').checked = this.settings.affiliate.enabledPrograms.includes('lowes');
 
                 // Pricing settings
                 document.getElementById('show-savings').checked = this.settings.pricing.showSavings;
@@ -717,11 +849,12 @@
 
                     const regionName = regionNames[region] || region;
                     const inputId = `affiliate-tag-${region.replace(/\./g, '-')}`;
+                    const labelId = `label-${inputId}`;
 
                     const item = document.createElement('div');
                     item.className = 'tag-item';
                     item.innerHTML = `
-                        <label for="${inputId}" class="tag-region">${regionName}</label>
+                        <label for="${inputId}" id="${labelId}" class="tag-region">${regionName}</label>
                         <input type="text" 
                                id="${inputId}"
                                class="tag-value" 
@@ -730,7 +863,9 @@
                                title="Affiliate tag for ${regionName}"
                                placeholder="Enter affiliate tag"
                                aria-label="Affiliate tag for ${regionName}"
-                               autocomplete="off">
+                               aria-labelledby="${labelId}"
+                               autocomplete="off"
+                               required>
                     `;
                     container.appendChild(item);
                 });
@@ -741,11 +876,35 @@
                         const region = e.target.dataset.region;
                         this.settings.affiliate.amazonTags[region] = e.target.value;
                     });
+                    
+                    // Add real-time validation
+                    input.addEventListener('input', (e) => {
+                        const value = e.target.value.trim();
+                        if (value.length < 3) {
+                            e.target.setCustomValidity('Affiliate tag must be at least 3 characters');
+                        } else if (!/^[a-zA-Z0-9\-_]+$/.test(value)) {
+                            e.target.setCustomValidity('Affiliate tag can only contain letters, numbers, hyphens, and underscores');
+                        } else {
+                            e.target.setCustomValidity('');
+                        }
+                    });
                 });
             }
 
             async loadAnalytics() {
                 try {
+                    // Check if Chrome extension APIs are available
+                    if (typeof chrome === 'undefined' || !chrome.storage) {
+                        console.warn('Chrome extension APIs not available. Using mock analytics data.');
+                        this.populateAnalytics({
+                            totalClicks: 0,
+                            amazonClicks: 0,
+                            otherClicks: 0,
+                            uniqueProducts: 0
+                        });
+                        return;
+                    }
+
                     const result = await chrome.storage.local.get('clickAnalytics');
                     const analytics = result.clickAnalytics || [];
                     
@@ -766,6 +925,13 @@
                     this.populateAnalytics(stats);
                 } catch (error) {
                     console.error('Error loading analytics:', error);
+                    // Fallback to empty stats
+                    this.populateAnalytics({
+                        totalClicks: 0,
+                        amazonClicks: 0,
+                        otherClicks: 0,
+                        uniqueProducts: 0
+                    });
                 }
             }
 
@@ -812,6 +978,9 @@
                 });
                 document.getElementById('enable-homedepot').addEventListener('change', (e) => {
                     this.updateAffiliatePrograms('homedepot', e.target.checked);
+                });
+                document.getElementById('enable-lowes').addEventListener('change', (e) => {
+                    this.updateAffiliatePrograms('lowes', e.target.checked);
                 });
 
                 // Pricing settings
@@ -880,7 +1049,11 @@
 
             toggleFixedRegionGroup() {
                 const fixedRegionGroup = document.getElementById('fixed-region-group');
-                fixedRegionGroup.style.display = this.settings.onelink.behavior === 'fixed' ? 'block' : 'none';
+                if (this.settings.onelink.behavior === 'fixed') {
+                    fixedRegionGroup.classList.remove('hidden');
+                } else {
+                    fixedRegionGroup.classList.add('hidden');
+                }
             }
 
             updateRadioItemStyles() {

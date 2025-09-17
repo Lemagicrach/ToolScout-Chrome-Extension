@@ -1,540 +1,746 @@
 /**
- * @file popup.js
- * @description ToolScout Extension - FIXED VERSION with Working Affiliate Links
- * Replace your entire popup.js with this code
+ * @file popup.js - Enhanced ToolScout Extension
+ * @description Complete implementation with Amazon Affiliate & OneLink Integration
+ * @version 2.0.0
  */
 
 (() => {
     'use strict';
 
     // =================================================================================================
-    // AMAZON AFFILIATE CONFIGURATION - CHANGE THIS TO YOUR TAG!
-    // =================================================================================================
-    amazonTags: {
-    'amazon.com': 'toolscout-20',      // Replace with your actual tags
-    'amazon.co.uk': 'toolscout-21',   
-    'amazon.de': 'toolscout01-21',
-    // ... etc
-}
-}
-    // =================================================================================================
-    // UI Elements references
+    // AFFILIATE CONFIGURATION SYSTEM
     // =================================================================================================
     
-    const UIElements = {
-        productTitle: document.getElementById('product-title'),
-        sitePrice: document.getElementById('site-price'),
-        comparisonList: document.getElementById('comparison-list'),
-        setAlertButton: document.getElementById('set-alert')
-    };
-
-    let currentProductData = null;
-
-    // Mock price data for comparisons
-    const MOCK_PRICE_DATA = {
-        'amazon.com': {
-            'drill': { 'homedepot.com': '$89.00', 'leroymerlin.fr': '$105.00' },
-            'hammer': { 'homedepot.com': '$45.00', 'leroymerlin.fr': '$48.00' },
-            'saw': { 'homedepot.com': '$125.00', 'leroymerlin.fr': '$119.00' }
+    const AFFILIATE_CONFIG = {
+        // Amazon Affiliate Tags by Region
+        amazonTags: {
+            'amazon.com': 'toolscout-20',          // US
+            'amazon.co.uk': 'toolscout-21',       // UK  
+            'amazon.de': 'toolscout01-21',        // Germany
+            'amazon.fr': 'toolscout08-21',        // France
+            'amazon.es': 'toolscout04-21',        // Spain
+            'amazon.it': 'toolscout01-21',        // Italy
+            'amazon.ca': 'toolscout0c-20',        // Canada
+            'amazon.com.au': 'toolscout-22',      // Australia
+            'amazon.co.jp': 'toolscout-22',       // Japan
+            'amazon.in': 'toolscout-21',          // India
         },
-        'homedepot.com': {
-            'drill': { 'amazon.com': '$99.00', 'leroymerlin.fr': '$105.00' },
-            'hammer': { 'amazon.com': '$42.00', 'leroymerlin.fr': '$48.00' },
-            'saw': { 'amazon.com': '$130.00', 'leroymerlin.fr': '$119.00' }
-        },
-        'leroymerlin.fr': {
-            'drill': { 'amazon.com': '$99.00', 'homedepot.com': '$89.00' },
-            'hammer': { 'amazon.com': '$42.00', 'homedepot.com': '$45.00' },
-            'saw': { 'amazon.com': '$130.00', 'homedepot.com': '$125.00' }
-        }
-    };
-
-    // =================================================================================================
-    // AFFILIATE BUTTON FUNCTION - This is the main function to add your Amazon button
-    // =================================================================================================
-    
-    function addAmazonAffiliateButton() {
-        // Only add if we have Amazon product data
-        if (!currentProductData || !currentProductData.url || !currentProductData.url.includes('amazon')) {
-            console.log('Not an Amazon product, skipping affiliate button');
-            return;
-        }
-
-        // Check if button already exists
-        if (document.getElementById('amazon-affiliate-btn')) {
-            console.log('Affiliate button already exists');
-            return;
-        }
-
-        // Create affiliate URL with your tag
-        const affiliateUrl = currentProductData.url + 
-                           (currentProductData.url.includes('?') ? '&' : '?') + 
-                           'tag=' + AMAZON_TAG;
-
-        // Create button HTML
-        const buttonHTML = `
-            <div id="affiliate-button-container" style="margin: 20px 0; padding: 15px; background: #FFF3E0; border-radius: 10px; border: 2px solid #FF9900;">
-                <a id="amazon-affiliate-btn" 
-                   href="${affiliateUrl}" 
-                   target="_blank" 
-                   style="display: block;
-                          background: linear-gradient(135deg, #FF9900 0%, #FF6600 100%);
-                          color: white;
-                          padding: 14px 24px;
-                          text-align: center;
-                          border-radius: 25px;
-                          text-decoration: none;
-                          font-weight: bold;
-                          font-size: 16px;
-                          box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
-                          transition: all 0.3s ease;">
-                    🛒 View Deal on Amazon →
-                </a>
-                <p style="font-size: 11px; color: #666; text-align: center; margin: 8px 0 0 0;">
-                    We earn from qualifying purchases (Amazon Associate)
-                </p>
-            </div>
-        `;
-
-        // Add to comparison list
-        if (UIElements.comparisonList) {
-            UIElements.comparisonList.insertAdjacentHTML('beforeend', buttonHTML);
-            
-            // Track clicks
-            const button = document.getElementById('amazon-affiliate-btn');
-            if (button) {
-                button.addEventListener('click', () => {
-                    console.log('Affiliate link clicked:', affiliateUrl);
-                    trackAffiliateClick();
-                });
-            }
-        }
-
-        console.log('✅ Amazon affiliate button added with tag:', AMAZON_TAG);
-    }
-
-    // Track affiliate clicks
-    function trackAffiliateClick() {
-        try {
-            chrome.storage.local.get(['affiliateClicks'], (result) => {
-                const clicks = result.affiliateClicks || [];
-                clicks.push({
-                    product: currentProductData.title || 'Unknown',
-                    price: currentProductData.price || 'N/A',
-                    timestamp: new Date().toISOString(),
-                    url: currentProductData.url
-                });
-                
-                chrome.storage.local.set({ 
-                    affiliateClicks: clicks.slice(-100),
-                    totalClicks: clicks.length 
-                });
-                
-                console.log('Click tracked. Total clicks:', clicks.length);
-            });
-        } catch (error) {
-            console.error('Error tracking click:', error);
-        }
-    }
-
-    // Utility functions
-    function getProductCategory(title) {
-        if (!title) return 'drill';
-        const titleLower = title.toLowerCase();
-        if (titleLower.includes('drill')) return 'drill';
-        if (titleLower.includes('hammer')) return 'hammer';
-        if (titleLower.includes('saw')) return 'saw';
-        return 'drill';
-    }
-
-    function parsePrice(priceString) {
-        if (!priceString) return 0;
-        return parseFloat(priceString.replace(/[^0-9.]/g, '')) || 0;
-    }
-
-    function formatPrice(price) {
-        if (typeof price === 'number') {
-            return `$${price.toFixed(2)}`;
-        }
-        return price || 'N/A';
-    }
-
-    function getSimplifiedDomain(hostname) {
-        if (!hostname) return '';
-        if (hostname.includes('amazon')) return 'amazon.com';
-        if (hostname.includes('homedepot')) return 'homedepot.com';
-        if (hostname.includes('leroymerlin')) return 'leroymerlin.fr';
-        return hostname;
-    }
-
-    function formatRetailerName(domain) {
-        const names = {
-            'amazon.com': 'Amazon',
-            'homedepot.com': 'Home Depot',
-            'leroymerlin.fr': 'Leroy Merlin'
-        };
-        return names[domain] || domain;
-    }
-
-    // Generate comparison data
-    function generateComparisonData(productData) {
-        if (!productData) return [];
-
-        const currentSite = getSimplifiedDomain(productData.retailer);
-        const productCategory = getProductCategory(productData.title);
-        const currentPrice = parsePrice(productData.price);
-
-        let comparisons = [];
         
-        if (MOCK_PRICE_DATA[currentSite] && MOCK_PRICE_DATA[currentSite][productCategory]) {
-            const mockData = MOCK_PRICE_DATA[currentSite][productCategory];
-            
-            for (const [retailer, price] of Object.entries(mockData)) {
-                const compPrice = parsePrice(price);
-                comparisons.push({
-                    retailer: formatRetailerName(retailer),
-                    price: price,
-                    numericPrice: compPrice,
-                    savings: currentPrice - compPrice
-                });
-            }
-        } else {
-            const retailers = [
-                { name: 'Amazon', domain: 'amazon.com' },
-                { name: 'Home Depot', domain: 'homedepot.com' },
-                { name: 'Leroy Merlin', domain: 'leroymerlin.fr' }
-            ].filter(r => !productData.retailer.includes(r.domain.split('.')[0]));
+        // OneLink Configuration
+        oneLink: {
+            enabled: true,
+            baseUrl: 'https://amzn.to',
+            trackingId: 'toolscout-20',
+            marketplace: 'US'  // Default marketplace
+        },
 
-            retailers.forEach(retailer => {
-                const variation = 0.8 + Math.random() * 0.4;
-                const compPrice = currentPrice * variation;
+        // Other Affiliate Programs
+        otherPrograms: {
+            'homedepot.com': {
+                enabled: true,
+                type: 'direct',
+                baseUrl: 'https://www.homedepot.com',
+                affiliateId: 'your-hd-affiliate-id'
+            },
+            'leroymerlin.fr': {
+                enabled: false, // Most don't have affiliate programs
+                type: 'direct'
+            }
+        }
+    };
+
+    // =================================================================================================
+    // USER PREFERENCES SYSTEM
+    // =================================================================================================
+    
+    class PreferencesManager {
+        constructor() {
+            this.defaultPreferences = {
+                affiliate: {
+                    enabledPrograms: ['amazon', 'homedepot'],
+                    autoRedirect: true,
+                    preferredRegion: 'auto', // auto-detect or specific region
+                    oneLink: true,
+                    showDisclosure: true
+                },
+                pricing: {
+                    currency: 'USD',
+                    showSavings: true,
+                    alertThreshold: 10 // percentage
+                },
+                privacy: {
+                    trackClicks: true,
+                    anonymousAnalytics: true
+                }
+            };
+        }
+
+        async getPreferences() {
+            try {
+                const result = await chrome.storage.sync.get('userPreferences');
+                return { ...this.defaultPreferences, ...result.userPreferences };
+            } catch (error) {
+                console.error('Error getting preferences:', error);
+                return this.defaultPreferences;
+            }
+        }
+
+        async setPreferences(preferences) {
+            try {
+                await chrome.storage.sync.set({ 
+                    userPreferences: { ...this.defaultPreferences, ...preferences }
+                });
+                return true;
+            } catch (error) {
+                console.error('Error setting preferences:', error);
+                return false;
+            }
+        }
+
+        async detectUserRegion() {
+            try {
+                // Use IP geolocation or browser language as fallback
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                const regionMap = {
+                    'US': 'amazon.com',
+                    'GB': 'amazon.co.uk', 
+                    'DE': 'amazon.de',
+                    'FR': 'amazon.fr',
+                    'ES': 'amazon.es',
+                    'IT': 'amazon.it',
+                    'CA': 'amazon.ca',
+                    'AU': 'amazon.com.au',
+                    'JP': 'amazon.co.jp',
+                    'IN': 'amazon.in'
+                };
+                
+                return regionMap[data.country_code] || 'amazon.com';
+            } catch (error) {
+                // Fallback to browser language
+                const lang = navigator.language.split('-')[1];
+                const langMap = {
+                    'GB': 'amazon.co.uk',
+                    'DE': 'amazon.de',
+                    'FR': 'amazon.fr',
+                    'ES': 'amazon.es',
+                    'IT': 'amazon.it'
+                };
+                return langMap[lang] || 'amazon.com';
+            }
+        }
+    }
+
+    // =================================================================================================
+    // ENHANCED AFFILIATE LINK GENERATOR
+    // =================================================================================================
+    
+    class AffiliateManager {
+        constructor(preferencesManager) {
+            this.preferences = preferencesManager;
+            this.analytics = new AnalyticsTracker();
+        }
+
+        async generateAmazonLink(originalUrl, options = {}) {
+            const prefs = await this.preferences.getPreferences();
+            
+            try {
+                const url = new URL(originalUrl);
+                const domain = url.hostname;
+                
+                // Get appropriate affiliate tag
+                const affiliateTag = AFFILIATE_CONFIG.amazonTags[domain] || AFFILIATE_CONFIG.amazonTags['amazon.com'];
+                
+                // Clean URL and add affiliate parameters
+                const cleanUrl = this.cleanAmazonUrl(originalUrl);
+                const finalUrl = new URL(cleanUrl);
+                
+                // Add affiliate tag
+                finalUrl.searchParams.set('tag', affiliateTag);
+                
+                // Add additional tracking parameters
+                finalUrl.searchParams.set('linkCode', 'as2');
+                finalUrl.searchParams.set('camp', '1789');
+                finalUrl.searchParams.set('creative', '9325');
+                
+                // OneLink redirection if enabled
+                if (prefs.affiliate.oneLink && prefs.affiliate.preferredRegion === 'auto') {
+                    const targetRegion = await this.preferences.detectUserRegion();
+                    if (domain !== targetRegion) {
+                        return this.generateOneLink(finalUrl.toString(), targetRegion);
+                    }
+                }
+                
+                return finalUrl.toString();
+                
+            } catch (error) {
+                console.error('Error generating Amazon affiliate link:', error);
+                return originalUrl;
+            }
+        }
+
+        generateOneLink(amazonUrl, targetRegion) {
+            try {
+                // Extract ASIN from Amazon URL
+                const asin = this.extractASIN(amazonUrl);
+                if (!asin) return amazonUrl;
+                
+                // Generate OneLink URL
+                const oneLink = `${AFFILIATE_CONFIG.oneLink.baseUrl}/${asin}?tag=${AFFILIATE_CONFIG.amazonTags[targetRegion]}`;
+                return oneLink;
+                
+            } catch (error) {
+                console.error('OneLink generation failed:', error);
+                return amazonUrl;
+            }
+        }
+
+        extractASIN(amazonUrl) {
+            const patterns = [
+                /\/dp\/([A-Z0-9]{10})/,
+                /\/product\/([A-Z0-9]{10})/,
+                /\/gp\/product\/([A-Z0-9]{10})/,
+                /asin=([A-Z0-9]{10})/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = amazonUrl.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        cleanAmazonUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                
+                // Keep only essential parameters
+                const keepParams = ['dp', 'gp', 'product'];
+                const newUrl = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
+                
+                return newUrl;
+            } catch (error) {
+                return url;
+            }
+        }
+
+        async generateOtherRetailerLinks(retailer, productUrl, productData) {
+            const config = AFFILIATE_CONFIG.otherPrograms[retailer];
+            if (!config || !config.enabled) return null;
+            
+            // Home Depot affiliate integration
+            if (retailer.includes('homedepot')) {
+                return this.generateHomeDepotLink(productUrl, productData);
+            }
+            
+            return null;
+        }
+
+        generateHomeDepotLink(originalUrl, productData) {
+            // Home Depot doesn't have a traditional affiliate program
+            // But we can track clicks for analytics
+            this.analytics.trackClick('homedepot', productData);
+            return originalUrl;
+        }
+    }
+
+    // =================================================================================================
+    // ANALYTICS & TRACKING SYSTEM
+    // =================================================================================================
+    
+    class AnalyticsTracker {
+        constructor() {
+            this.sessionId = this.generateSessionId();
+        }
+
+        generateSessionId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        async trackClick(retailer, productData, affiliateUrl = null) {
+            try {
+                const clickData = {
+                    sessionId: this.sessionId,
+                    timestamp: new Date().toISOString(),
+                    retailer: retailer,
+                    productTitle: productData.title,
+                    productPrice: productData.price,
+                    originalUrl: productData.url,
+                    affiliateUrl: affiliateUrl,
+                    userAgent: navigator.userAgent.substring(0, 200)
+                };
+
+                // Store locally for privacy
+                const result = await chrome.storage.local.get('clickAnalytics');
+                const analytics = result.clickAnalytics || [];
+                
+                analytics.push(clickData);
+                
+                // Keep only last 1000 clicks
+                if (analytics.length > 1000) {
+                    analytics.splice(0, analytics.length - 1000);
+                }
+                
+                await chrome.storage.local.set({ clickAnalytics: analytics });
+                
+                console.log('Click tracked:', retailer);
+                
+            } catch (error) {
+                console.error('Analytics tracking error:', error);
+            }
+        }
+
+        async getAnalytics(days = 30) {
+            try {
+                const result = await chrome.storage.local.get('clickAnalytics');
+                const analytics = result.clickAnalytics || [];
+                
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                
+                return analytics.filter(click => 
+                    new Date(click.timestamp) > cutoffDate
+                );
+            } catch (error) {
+                console.error('Error getting analytics:', error);
+                return [];
+            }
+        }
+    }
+
+    // =================================================================================================
+    // ENHANCED PRICE COMPARISON SYSTEM
+    // =================================================================================================
+    
+    class PriceComparisonEngine {
+        constructor() {
+            this.cache = new Map();
+            this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        }
+
+        async getComparisons(productData) {
+            const cacheKey = this.generateCacheKey(productData);
+            
+            // Check cache first
+            if (this.cache.has(cacheKey)) {
+                const cached = this.cache.get(cacheKey);
+                if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                    return cached.data;
+                }
+            }
+
+            try {
+                // For MVP, use enhanced mock data with more realistic pricing
+                const comparisons = await this.generateRealisticComparisons(productData);
+                
+                // Cache results
+                this.cache.set(cacheKey, {
+                    data: comparisons,
+                    timestamp: Date.now()
+                });
+                
+                return comparisons;
+                
+            } catch (error) {
+                console.error('Price comparison error:', error);
+                return this.getFallbackComparisons(productData);
+            }
+        }
+
+        generateCacheKey(productData) {
+            return btoa(`${productData.url}-${productData.title}-${productData.price}`);
+        }
+
+        async generateRealisticComparisons(productData) {
+            const currentPrice = this.parsePrice(productData.price);
+            if (!currentPrice) return [];
+
+            const retailers = this.getAlternativeRetailers(productData.retailer);
+            const comparisons = [];
+
+            for (const retailer of retailers) {
+                // Generate realistic price variations (±5% to ±25%)
+                const variation = 0.75 + Math.random() * 0.5; // 0.75 to 1.25
+                const competitorPrice = currentPrice * variation;
+                
                 comparisons.push({
                     retailer: retailer.name,
-                    price: formatPrice(compPrice),
-                    numericPrice: compPrice,
-                    savings: currentPrice - compPrice
+                    price: this.formatPrice(competitorPrice),
+                    numericPrice: competitorPrice,
+                    savings: currentPrice - competitorPrice,
+                    availability: 'In Stock',
+                    confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
+                    url: retailer.searchUrl || '#'
                 });
-            });
-        }
-
-        comparisons.sort((a, b) => a.numericPrice - b.numericPrice);
-        return comparisons;
-    }
-
-    // Update UI
-    function updateUI(data) {
-        if (!data) return;
-        
-        if (UIElements.productTitle) {
-            UIElements.productTitle.textContent = data.title || 'Product not found';
-        }
-        if (UIElements.sitePrice) {
-            UIElements.sitePrice.textContent = data.price || 'N/A';
-        }
-    }
-
-    function updateUIForError(message) {
-        if (UIElements.productTitle) {
-            UIElements.productTitle.textContent = message;
-        }
-        if (UIElements.sitePrice) {
-            UIElements.sitePrice.textContent = "N/A";
-        }
-        if (UIElements.setAlertButton) {
-            UIElements.setAlertButton.disabled = true;
-            UIElements.setAlertButton.textContent = "Unavailable";
-        }
-    }
-
-    // Display comparisons
-    function displayActualComparisons(comparisons) {
-        if (!UIElements.comparisonList || !comparisons) return;
-
-        UIElements.comparisonList.innerHTML = '';
-        
-        // Add current retailer info
-        if (currentProductData) {
-            const currentRetailer = document.createElement('div');
-            currentRetailer.style.cssText = 'font-size: 12px; color: #657786; margin-bottom: 10px;';
-            currentRetailer.textContent = `Current: ${formatRetailerName(getSimplifiedDomain(currentProductData.retailer))}`;
-            UIElements.comparisonList.appendChild(currentRetailer);
-        }
-        
-        const comparisonContainer = document.createElement('div');
-        comparisonContainer.style.cssText = 'margin-top: 10px;';
-        
-        comparisons.forEach((comp) => {
-            const item = document.createElement('div');
-            item.style.cssText = `
-                padding: 10px;
-                margin-bottom: 8px;
-                background: white;
-                border: 1px solid #e1e8ed;
-                border-radius: 6px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                transition: all 0.2s ease;
-            `;
-            
-            const retailerName = document.createElement('span');
-            retailerName.style.cssText = 'font-weight: 600; color: #14171a;';
-            retailerName.textContent = comp.retailer;
-            
-            const priceContainer = document.createElement('div');
-            priceContainer.style.cssText = 'text-align: right;';
-            
-            const price = document.createElement('div');
-            price.style.cssText = 'font-weight: 700; color: #1da1f2;';
-            price.textContent = comp.price;
-            
-            const savings = document.createElement('div');
-            savings.style.cssText = 'font-size: 11px; color: #17bf63;';
-            if (comp.savings > 0) {
-                savings.textContent = `Save ${formatPrice(comp.savings)}`;
-            } else if (comp.savings < 0) {
-                savings.style.color = '#e0245e';
-                savings.textContent = `+${formatPrice(Math.abs(comp.savings))}`;
-            }
-            
-            priceContainer.appendChild(price);
-            if (comp.savings !== 0) {
-                priceContainer.appendChild(savings);
-            }
-            
-            item.appendChild(retailerName);
-            item.appendChild(priceContainer);
-            comparisonContainer.appendChild(item);
-        });
-        
-        UIElements.comparisonList.appendChild(comparisonContainer);
-        
-        // Add best deal summary if found
-        const bestDeal = comparisons[0];
-        if (bestDeal && bestDeal.savings > 0) {
-            const summary = document.createElement('div');
-            summary.style.cssText = `
-                margin-top: 12px;
-                padding: 10px;
-                background: linear-gradient(135deg, #17BF63 0%, #20d976 100%);
-                color: white;
-                border-radius: 8px;
-                text-align: center;
-                font-weight: 600;
-            `;
-            summary.textContent = `💰 Best deal: Save ${formatPrice(bestDeal.savings)} at ${bestDeal.retailer}!`;
-            UIElements.comparisonList.appendChild(summary);
-        }
-        
-        // ADD THE AMAZON AFFILIATE BUTTON HERE!
-        addAmazonAffiliateButton();
-    }
-
-    function displayPriceComparisons() {
-        if (!currentProductData || !UIElements.comparisonList) return;
-
-        UIElements.comparisonList.innerHTML = '';
-        
-        const loading = document.createElement('li');
-        loading.style.cssText = 'list-style: none; color: #999; font-style: italic;';
-        loading.textContent = 'Checking other retailers...';
-        UIElements.comparisonList.appendChild(loading);
-        
-        setTimeout(() => {
-            const comparisons = generateComparisonData(currentProductData);
-            displayActualComparisons(comparisons);
-        }, 1000);
-    }
-
-    function showInstructions() {
-        if (!UIElements.comparisonList) return;
-        
-        const instructions = document.createElement('div');
-        instructions.innerHTML = `
-            <p style="font-size: 12px; color: #657786; margin: 10px 0; line-height: 1.5;">
-                <strong>How to use:</strong><br>
-                1. Navigate to a product page<br>
-                2. Click the ToolScout icon<br>
-                3. View price comparisons instantly!
-            </p>
-        `;
-        UIElements.comparisonList.innerHTML = '';
-        UIElements.comparisonList.appendChild(instructions);
-    }
-
-    function showSupportedSites() {
-        if (!UIElements.comparisonList) return;
-        
-        const supportedList = document.createElement('div');
-        supportedList.innerHTML = `
-            <p style="font-size: 12px; color: #657786; margin: 10px 0;">
-                <strong>Supported sites:</strong><br>
-                • Amazon (all regions)<br>
-                • Home Depot<br>
-                • Leroy Merlin
-            </p>
-        `;
-        UIElements.comparisonList.innerHTML = '';
-        UIElements.comparisonList.appendChild(supportedList);
-    }
-
-    // Main function to load product data
-    function loadProductData() {
-        updateUI({ title: "Scanning page...", price: "..." });
-        
-        if (UIElements.setAlertButton) {
-            UIElements.setAlertButton.textContent = "Loading...";
-            UIElements.setAlertButton.disabled = true;
-        }
-
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (!tabs[0] || !tabs[0].id) {
-                updateUIForError("Could not identify the active tab.");
-                return;
             }
 
-            const supportedSites = ['amazon.', 'homedepot.', 'leroymerlin.'];
-            const currentUrl = tabs[0].url || '';
-            const isSupported = supportedSites.some(site => currentUrl.includes(site));
+            return comparisons.sort((a, b) => a.numericPrice - b.numericPrice);
+        }
 
-            if (!isSupported) {
-                updateUIForError("This site is not supported yet.");
-                showSupportedSites();
-                return;
-            }
+        getAlternativeRetailers(currentRetailer) {
+            const allRetailers = [
+                { name: 'Amazon', domain: 'amazon.com', searchUrl: 'https://amazon.com/s?k=' },
+                { name: 'Home Depot', domain: 'homedepot.com', searchUrl: 'https://homedepot.com/s/' },
+                { name: 'Lowes', domain: 'lowes.com', searchUrl: 'https://lowes.com/search?searchTerm=' },
+                { name: 'Leroy Merlin', domain: 'leroymerlin.fr', searchUrl: 'https://leroymerlin.fr/recherche?term=' }
+            ];
 
-            chrome.tabs.sendMessage(tabs[0].id, { action: "getProductData" }, (response) => {
+            return allRetailers.filter(retailer => 
+                !currentRetailer.includes(retailer.domain.split('.')[0])
+            );
+        }
+
+        parsePrice(priceString) {
+            if (!priceString) return 0;
+            const cleaned = priceString.replace(/[^\d.,]/g, '');
+            return parseFloat(cleaned.replace(',', '.')) || 0;
+        }
+
+        formatPrice(price) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(price);
+        }
+
+        getFallbackComparisons(productData) {
+            return [{
+                retailer: 'Other Retailers',
+                price: 'Check manually',
+                numericPrice: 0,
+                savings: 0,
+                availability: 'Unknown',
+                confidence: 0.5
+            }];
+        }
+    }
+
+    // =================================================================================================
+    // ENHANCED UI CONTROLLER
+    // =================================================================================================
+    
+    class UIController {
+        constructor() {
+            this.preferencesManager = new PreferencesManager();
+            this.affiliateManager = new AffiliateManager(this.preferencesManager);
+            this.comparisonEngine = new PriceComparisonEngine();
+            this.analytics = new AnalyticsTracker();
+            
+            this.elements = {
+                productTitle: document.getElementById('product-title'),
+                sitePrice: document.getElementById('site-price'),
+                comparisonList: document.getElementById('comparison-list'),
+                setAlertButton: document.getElementById('set-alert'),
+                currentRetailer: document.getElementById('current-retailer')
+            };
+            
+            this.currentProductData = null;
+        }
+
+        async initialize() {
+            await this.loadProductData();
+            this.bindEvents();
+        }
+
+        async loadProductData() {
+            this.showLoading();
+            
+            try {
+                const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (!tabs[0]?.id) {
+                    this.showError('Could not identify the active tab');
+                    return;
+                }
+
+                const response = await chrome.tabs.sendMessage(tabs[0].id, { 
+                    action: "getProductData" 
+                });
+
                 if (chrome.runtime.lastError) {
-                    updateUIForError("Please refresh the page and try again.");
-                    console.warn("ToolScout:", chrome.runtime.lastError.message);
+                    this.showError('Please refresh the page and try again');
                     return;
                 }
 
-                if (!response || !response.title || response.title === "Product not found") {
-                    updateUIForError("No product found on this page.");
-                    showInstructions();
+                if (!response?.title || response.title === "Product not found") {
+                    this.showInstructions();
                     return;
                 }
 
-                if (!response.url || !response.url.startsWith('http')) {
-                    updateUIForError("Invalid product page.");
-                    return;
-                }
-
-                currentProductData = response;
-                console.log('Product data loaded:', currentProductData);
+                this.currentProductData = response;
+                await this.renderProductData();
+                await this.loadPriceComparisons();
                 
-                updateUI(currentProductData);
-                displayPriceComparisons();
-                checkIfAlertExists();
+            } catch (error) {
+                console.error('Error loading product data:', error);
+                this.showError('An error occurred while loading product data');
+            }
+        }
+
+        async renderProductData() {
+            if (!this.currentProductData) return;
+
+            const { title, price, retailer } = this.currentProductData;
+            
+            if (this.elements.productTitle) {
+                this.elements.productTitle.textContent = title;
+            }
+            
+            if (this.elements.sitePrice) {
+                this.elements.sitePrice.textContent = price;
+            }
+            
+            if (this.elements.currentRetailer) {
+                this.elements.currentRetailer.textContent = this.formatRetailerName(retailer);
+            }
+            
+            // Enable alert button
+            if (this.elements.setAlertButton) {
+                this.elements.setAlertButton.disabled = false;
+                this.elements.setAlertButton.textContent = '🔔 Set Price Alert';
+            }
+        }
+
+        async loadPriceComparisons() {
+            if (!this.currentProductData || !this.elements.comparisonList) return;
+
+            // Show loading state
+            this.elements.comparisonList.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    Checking prices across retailers...
+                </div>
+            `;
+
+            try {
+                const comparisons = await this.comparisonEngine.getComparisons(this.currentProductData);
+                await this.renderComparisons(comparisons);
+                await this.addAffiliateButtons();
+                
+            } catch (error) {
+                console.error('Error loading comparisons:', error);
+                this.elements.comparisonList.innerHTML = `
+                    <div class="error-message">Unable to load price comparisons</div>
+                `;
+            }
+        }
+
+        async renderComparisons(comparisons) {
+            if (!comparisons?.length) {
+                this.elements.comparisonList.innerHTML = `
+                    <div class="placeholder-text">No comparisons available</div>
+                `;
+                return;
+            }
+
+            let html = '';
+            
+            comparisons.forEach((comp, index) => {
+                const savingsClass = comp.savings > 0 ? 'savings-positive' : 
+                                   comp.savings < 0 ? 'savings-negative' : '';
+                
+                html += `
+                    <div class="comparison-item ${index === 0 ? 'best-deal' : ''}">
+                        <div class="retailer-info">
+                            <span class="retailer-name">${comp.retailer}</span>
+                            <span class="availability">${comp.availability}</span>
+                        </div>
+                        <div class="price-info">
+                            <div class="comparison-price">${comp.price}</div>
+                            ${comp.savings !== 0 ? `
+                                <div class="savings-amount ${savingsClass}">
+                                    ${comp.savings > 0 ? `Save ${this.comparisonEngine.formatPrice(Math.abs(comp.savings))}` : 
+                                      `+${this.comparisonEngine.formatPrice(Math.abs(comp.savings))}`}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
             });
-        });
-    }
 
-    // Handle alert button click
-    function handleSetAlertClick() {
-        if (!currentProductData) {
-            console.error("No product data available.");
-            return;
+            this.elements.comparisonList.innerHTML = html;
+
+            // Show best deal summary
+            const bestDeal = comparisons[0];
+            if (bestDeal.savings > 5) {
+                const summary = document.createElement('div');
+                summary.className = 'best-deal-summary';
+                summary.innerHTML = `
+                    💰 Best Deal: Save ${this.comparisonEngine.formatPrice(bestDeal.savings)} at ${bestDeal.retailer}!
+                `;
+                this.elements.comparisonList.appendChild(summary);
+            }
         }
 
-        if (!UIElements.setAlertButton) return;
+        async addAffiliateButtons() {
+            if (!this.currentProductData) return;
 
-        UIElements.setAlertButton.textContent = "Saving...";
-        UIElements.setAlertButton.disabled = true;
-
-        chrome.runtime.sendMessage({ 
-            action: "saveAlert", 
-            data: currentProductData 
-        }, (response) => {
-            if (chrome.runtime.lastError) {
-                UIElements.setAlertButton.textContent = "Error!";
-                console.error("Connection error:", chrome.runtime.lastError.message);
-                setTimeout(() => {
-                    UIElements.setAlertButton.textContent = "🔔 Set Price Alert";
-                    UIElements.setAlertButton.disabled = false;
-                }, 2000);
-                return;
+            const prefs = await this.preferencesManager.getPreferences();
+            
+            // Amazon affiliate button
+            if (this.currentProductData.url.includes('amazon') && 
+                prefs.affiliate.enabledPrograms.includes('amazon')) {
+                await this.addAmazonAffiliateButton();
             }
 
-            if (!response || !response.success) {
-                const errorMessage = response ? response.error : "Unknown error";
+            // Other retailer buttons
+            await this.addOtherRetailerButtons();
+        }
+
+        async addAmazonAffiliateButton() {
+            if (document.getElementById('amazon-affiliate-btn')) return;
+
+            try {
+                const affiliateUrl = await this.affiliateManager.generateAmazonLink(
+                    this.currentProductData.url
+                );
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.id = 'affiliate-button-container';
+                buttonContainer.innerHTML = `
+                    <a id="amazon-affiliate-btn" 
+                       href="${affiliateUrl}" 
+                       target="_blank"
+                       class="amazon-button">
+                        🛒 View Deal on Amazon →
+                    </a>
+                    <p class="affiliate-disclaimer">
+                        We earn from qualifying purchases (Amazon Associate)
+                    </p>
+                `;
+
+                this.elements.comparisonList.appendChild(buttonContainer);
+
+                // Track clicks
+                document.getElementById('amazon-affiliate-btn').addEventListener('click', () => {
+                    this.analytics.trackClick('amazon', this.currentProductData, affiliateUrl);
+                });
+
+                console.log('✅ Amazon affiliate button added');
                 
-                if (errorMessage.includes("already exists")) {
-                    UIElements.setAlertButton.textContent = "✅ Alert Set!";
+            } catch (error) {
+                console.error('Error adding Amazon affiliate button:', error);
+            }
+        }
+
+        async addOtherRetailerButtons() {
+            // Add buttons for other affiliate programs as needed
+            // This can be expanded based on available affiliate programs
+        }
+
+        showLoading() {
+            if (this.elements.productTitle) {
+                this.elements.productTitle.textContent = 'Loading...';
+            }
+            if (this.elements.sitePrice) {
+                this.elements.sitePrice.textContent = '...';
+            }
+        }
+
+        showError(message) {
+            if (this.elements.productTitle) {
+                this.elements.productTitle.textContent = message;
+            }
+            if (this.elements.comparisonList) {
+                this.elements.comparisonList.innerHTML = `
+                    <div class="error-message">${message}</div>
+                `;
+            }
+        }
+
+        showInstructions() {
+            if (this.elements.comparisonList) {
+                this.elements.comparisonList.innerHTML = `
+                    <div class="instructions">
+                        <h3>How to use ToolScout:</h3>
+                        <ol>
+                            <li>Navigate to a product page</li>
+                            <li>Click the ToolScout icon</li>
+                            <li>View instant price comparisons</li>
+                            <li>Set price alerts</li>
+                        </ol>
+                        <p><strong>Supported sites:</strong><br>
+                        Amazon, Home Depot, Leroy Merlin</p>
+                    </div>
+                `;
+            }
+        }
+
+        formatRetailerName(domain) {
+            const names = {
+                'amazon.com': 'Amazon US',
+                'amazon.co.uk': 'Amazon UK',
+                'amazon.de': 'Amazon DE',
+                'amazon.fr': 'Amazon FR',
+                'homedepot.com': 'Home Depot',
+                'leroymerlin.fr': 'Leroy Merlin'
+            };
+            
+            for (const [key, name] of Object.entries(names)) {
+                if (domain.includes(key)) return name;
+            }
+            
+            return domain;
+        }
+
+        bindEvents() {
+            if (this.elements.setAlertButton) {
+                this.elements.setAlertButton.addEventListener('click', () => {
+                    this.handleSetAlert();
+                });
+            }
+        }
+
+        async handleSetAlert() {
+            if (!this.currentProductData) return;
+
+            this.elements.setAlertButton.textContent = 'Saving...';
+            this.elements.setAlertButton.disabled = true;
+
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    action: 'saveAlert',
+                    data: this.currentProductData
+                });
+
+                if (response?.success) {
+                    this.elements.setAlertButton.textContent = '✅ Alert Set!';
                 } else {
-                    UIElements.setAlertButton.textContent = "Error!";
-                    setTimeout(() => {
-                        UIElements.setAlertButton.textContent = "🔔 Set Price Alert";
-                        UIElements.setAlertButton.disabled = false;
-                    }, 2000);
+                    throw new Error(response?.error || 'Unknown error');
                 }
-            } else {
-                UIElements.setAlertButton.textContent = "✅ Alert Set!";
+                
+            } catch (error) {
+                console.error('Error setting alert:', error);
+                this.elements.setAlertButton.textContent = 'Error!';
+                
+                setTimeout(() => {
+                    this.elements.setAlertButton.textContent = '🔔 Set Price Alert';
+                    this.elements.setAlertButton.disabled = false;
+                }, 2000);
             }
-        });
+        }
     }
 
-    // Check if alert exists
-    function checkIfAlertExists() {
-        if (!currentProductData || !currentProductData.url || !UIElements.setAlertButton) {
-            if (UIElements.setAlertButton) {
-                UIElements.setAlertButton.disabled = true;
-                UIElements.setAlertButton.textContent = "Invalid Data";
-            }
-            return;
-        }
-
-        chrome.storage.local.get("alerts", (result) => {
-            if (chrome.runtime.lastError) {
-                console.error("Error checking alerts:", chrome.runtime.lastError);
-                UIElements.setAlertButton.textContent = "🔔 Set Price Alert";
-                UIElements.setAlertButton.disabled = false;
-                return;
-            }
-
-            const alerts = result.alerts || [];
-            const isAlertSet = alerts.some(alert => alert.url === currentProductData.url);
-
-            if (isAlertSet) {
-                UIElements.setAlertButton.textContent = "✅ Alert Set!";
-                UIElements.setAlertButton.disabled = true;
-            } else {
-                UIElements.setAlertButton.textContent = "🔔 Set Price Alert";
-                UIElements.setAlertButton.disabled = false;
-            }
-        });
-    }
-
-    // Initialize
-    function initialize() {
-        const missingElements = Object.entries(UIElements)
-            .filter(([, element]) => !element)
-            .map(([key]) => key);
-
-        if (missingElements.length > 0) {
-            console.error("Missing DOM elements:", missingElements);
-        }
-
-        if (UIElements.setAlertButton) {
-            UIElements.setAlertButton.addEventListener('click', handleSetAlertClick);
-        }
-
-        loadProductData();
-    }
-
-    // Start when DOM is ready
+    // =================================================================================================
+    // INITIALIZATION
+    // =================================================================================================
+    
+    // Initialize the extension when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initialize);
+        document.addEventListener('DOMContentLoaded', () => {
+            new UIController().initialize();
+        });
     } else {
-        initialize();
+        new UIController().initialize();
     }
 
-    // Debug functions
+    // Export for debugging
     window.ToolScoutDebug = {
-        currentProductData: () => currentProductData,
-        checkAffiliateTag: () => console.log('Your Amazon tag is:', AMAZON_TAG),
-        testAffiliateButton: () => addAmazonAffiliateButton()
+        AFFILIATE_CONFIG,
+        PreferencesManager,
+        AffiliateManager,
+        AnalyticsTracker,
+        PriceComparisonEngine
     };
 
 })();
