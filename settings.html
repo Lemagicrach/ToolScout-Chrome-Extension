@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolScout Settings</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #357ABD;
+            --success-color: #17BF63;
+            --warning-color: #FF9900;
+            --danger-color: #E0245E;
+            --light-gray: #f8f9fa;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--light-gray);
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1a202c;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .settings-content {
+            padding: 0;
+        }
+
+        .section {
+            border-bottom: 1px solid var(--border-color);
+            padding: 30px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .section-description {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .form-group fieldset {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-group legend {
+            display: block;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 8px;
+            padding: 0;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .checkbox-label {
+            flex: 1;
+        }
+
+        .checkbox-title {
+            font-weight: 500;
+            color: #1a202c;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .checkbox-title:hover {
+            color: var(--primary-color);
+        }
+
+        .checkbox-description {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .radio-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .radio-item.active {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: var(--primary-color);
+        }
+
+        .affiliate-tags {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .tag-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--light-gray);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tag-region {
+            font-weight: 500;
+            color: #1a202c;
+        }
+
+        .tag-value {
+            font-family: monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 30px;
+            background: var(--light-gray);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-info {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            color: var(--primary-color);
+        }
+
+        .alert-success {
+            background: rgba(23, 191, 99, 0.1);
+            border: 1px solid rgba(23, 191, 99, 0.2);
+            color: var(--success-color);
+        }
+
+        .alert-warning {
+            background: rgba(255, 153, 0, 0.1);
+            border: 1px solid rgba(255, 153, 0, 0.2);
+            color: var(--warning-color);
+        }
+
+        .analytics-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 6px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ ToolScout Settings</h1>
+            <p>Configure your price tracking and affiliate preferences</p>
+        </div>
+
+        <div class="settings-content">
+            <!-- Amazon Affiliate & OneLink Settings -->
+            <div class="section">
+                <div class="section-header">
+                    <span style="font-size: 24px;">🔗</span>
+                    <div>
+                        <div class="section-title">Amazon Affiliate & OneLink</div>
+                    </div>
+                </div>
+                <div class="section-description">
+                    Configure how affiliate links are generated and handle international Amazon redirections.
+                </div>
+
+                <div class="form-group">
+                    <label>OneLink Redirection Behavior</label>
+                    <div class="radio-group">
+                        <div class="radio-item" data-value="auto">
+                            <input type="radio" name="onelink-behavior" value="auto" id="onelink-auto" checked>
+                            <div>
+                                <div class="checkbox-title">🌍 Auto-Redirect (Recommended)</div>
+                                <div class="checkbox-description">Automatically redirect to user's local Amazon store based on location</div>
+                            </div>
+                        </div>
+                        <div class="radio-item" data-value="ask">
+                            <input type="radio" name="onelink-behavior" value="ask" id="onelink-ask">
+                            <div>
+                                <div class="checkbox-title">❓ Ask Every Time</div>
+                                <div class="checkbox-description">Show a popup to choose Amazon region for each product</div>
+                            </div>
+                        </div>
+                        <div class="radio-item" data-value="fixed">
+                            <input type="radio" name="onelink-behavior" value="fixed" id="onelink-fixed">
+                            <div>
+                                <div class="checkbox-title">📍 Fixed Region</div>
+                                <div class="checkbox-description">Always use a specific Amazon region</div>
+                            </div>
+                        </div>
+                        <div class="radio-item" data-value="disabled">
+                            <input type="radio" name="onelink-behavior" value="disabled" id="onelink-disabled">
+                            <div>
+                                <div class="checkbox-title">🚫 Disabled</div>
+                                <div class="checkbox-description">Use original Amazon links without redirection</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="fixed-region-group" style="display: none;">
+                    <label for="preferred-region">Preferred Amazon Region</label>
+                    <select class="form-control" id="preferred-region">
+                        <option value="amazon.com">🇺🇸 Amazon US</option>
+                        <option value="amazon.co.uk">🇬🇧 Amazon UK</option>
+                        <option value="amazon.de">🇩🇪 Amazon Germany</option>
+                        <option value="amazon.fr">🇫🇷 Amazon France</option>
+                        <option value="amazon.es">🇪🇸 Amazon Spain</option>
+                        <option value="amazon.it">🇮🇹 Amazon Italy</option>
+                        <option value="amazon.ca">🇨🇦 Amazon Canada</option>
+                        <option value="amazon.com.au">🇦🇺 Amazon Australia</option>
+                        <option value="amazon.co.jp">🇯🇵 Amazon Japan</option>
+                    </select>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>About OneLink:</strong> OneLink automatically redirects users to their local Amazon store, potentially increasing conversion rates and ensuring better user experience.
+                </div>
+
+                <div class="form-group">
+                    <label>Your Amazon Affiliate Tags by Region</label>
+                    <div class="affiliate-tags" id="affiliate-tags">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="help-text">
+                        These are your affiliate tags for different Amazon regions. Make sure they're correctly configured for maximum earnings.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retailer Integration Settings -->
+            <div class="section">
+                <div class="section-header">
+                    <span style="font-size: 24px;">🏪</span>
+                    <div>
+                        <div class="section-title">Retailer Integration</div>
+                    </div>
+                </div>
+                <div class="section-description">
+                    Choose which retailers to include in price comparisons and affiliate programs.
+                </div>
+
+                <div class="form-group">
+                    <label>Enabled Affiliate Programs</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enable-amazon" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">🛒 Amazon Affiliate Program</div>
+                                <div class="checkbox-description">Show "View on Amazon" buttons with your affiliate links</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enable-homedepot">
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">🏠 Home Depot (Click Tracking)</div>
+                                <div class="checkbox-description">Track clicks to Home Depot for analytics (no affiliate program)</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="enable-lowes">
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">🔨 Lowes (Future Support)</div>
+                                <div class="checkbox-description">Coming soon - Lowes price comparisons</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Price Comparison Settings</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-savings" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">💰 Show Savings Amount</div>
+                                <div class="checkbox-description">Display how much you can save with each retailer</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="highlight-best-deal" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">⭐ Highlight Best Deals</div>
+                                <div class="checkbox-description">Visually emphasize the retailer with the best price</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="cache-prices" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">⚡ Cache Price Data</div>
+                                <div class="checkbox-description">Store price comparisons for faster loading (5 minute cache)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy & Analytics -->
+            <div class="section">
+                <div class="section-header">
+                    <span style="font-size: 24px;">🔒</span>
+                    <div>
+                        <div class="section-title">Privacy & Analytics</div>
+                    </div>
+                </div>
+                <div class="section-description">
+                    Control data collection and privacy settings. All data is stored locally on your device.
+                </div>
+
+                <div class="form-group">
+                    <label>Data Collection Settings</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="track-clicks" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">📊 Track Affiliate Clicks</div>
+                                <div class="checkbox-description">Store anonymous click data locally for analytics (helps improve the extension)</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="store-search-history">
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">🔍 Store Product Search History</div>
+                                <div class="checkbox-description">Remember products you've viewed for faster comparisons</div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="anonymous-usage" checked>
+                            <div class="checkbox-label">
+                                <div class="checkbox-title">📈 Anonymous Usage Statistics</div>
+                                <div class="checkbox-description">Help improve ToolScout with anonymous usage data</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>Privacy Notice:</strong> All data is stored locally on your device. We never send personal information to external servers or share data with third parties.
+                </div>
+
+                <div class="form-group">
+                    <label>Your Analytics Summary (Last 30 Days)</label>
+                    <div class="analytics-stats" id="analytics-stats">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <div class="section">
+                <div class="section-header">
+                    <span style="font-size: 24px;">⚡</span>
+                    <div>
+                        <div class="section-title">Advanced Settings</div>
+                    </div>
+                </div>
+                <div class="section-description">
+                    Fine-tune extension behavior and performance settings.
+                </div>
+
+                <div class="form-group">
+                    <label for="price-alert-threshold">Price Alert Threshold (%)</label>
+                    <input type="number" class="form-control" id="price-alert-threshold" min="1" max="50" value="10">
+                    <div class="help-text">Minimum price drop percentage to trigger alerts</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cache-duration">Price Cache Duration (minutes)</label>
+                    <select class="form-control" id="cache-duration">
+                        <option value="1">1 minute</option>
+                        <option value="5" selected>5 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Default Currency</label>
+                    <select class="form-control" id="default-currency">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="CAD">CAD (C$)</option>
+                        <option value="AUD">AUD (A$)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-secondary" id="reset-button">Reset to Defaults</button>
+            <button class="btn btn-primary" id="save-button">Save Settings</button>
+        </div>
+    </div>
+
+    <div id="save-notification" style="display: none; position: fixed; top: 20px; right: 20px; background: var(--success-color); color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;">
+        ✅ Settings saved successfully!
+    </div>
+
+    <script>
+        // Settings Management
+        class SettingsManager {
+            constructor() {
+                this.defaultSettings = {
+                    onelink: {
+                        behavior: 'auto', // auto, ask, fixed, disabled
+                        preferredRegion: 'amazon.com'
+                    },
+                    affiliate: {
+                        enabledPrograms: ['amazon'],
+                        amazonTags: {
+                            'amazon.com': 'toolscout-20',
+                            'amazon.co.uk': 'toolscout-21',
+                            'amazon.de': 'toolscout01-21',
+                            'amazon.fr': 'toolscout08-21',
+                            'amazon.es': 'toolscout04-21',
+                            'amazon.it': 'toolscout01-21',
+                            'amazon.ca': 'toolscout0c-20',
+                            'amazon.com.au': 'toolscout-22',
+                            'amazon.co.jp': 'toolscout-22'
+                        }
+                    },
+                    pricing: {
+                        showSavings: true,
+                        highlightBestDeal: true,
+                        cachePrices: true,
+                        currency: 'USD',
+                        alertThreshold: 10,
+                        cacheDuration: 5
+                    },
+                    privacy: {
+                        trackClicks: true,
+                        storeSearchHistory: false,
+                        anonymousUsage: true
+                    }
+                };
+                
+                this.init();
+            }
+
+            async init() {
+                await this.loadSettings();
+                this.bindEvents();
+                this.populateUI();
+                await this.loadAnalytics();
+            }
+
+            async loadSettings() {
+                try {
+                    const result = await chrome.storage.sync.get('toolscoutSettings');
+                    this.settings = { ...this.defaultSettings, ...(result.toolscoutSettings || {}) };
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                    this.settings = this.defaultSettings;
+                }
+            }
+
+            async saveSettings() {
+                try {
+                    await chrome.storage.sync.set({ toolscoutSettings: this.settings });
+                    this.showNotification('Settings saved successfully!', 'success');
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    this.showNotification('Error saving settings', 'error');
+                }
+            }
+
+            populateUI() {
+                // OneLink behavior
+                const onelinkRadios = document.querySelectorAll('input[name="onelink-behavior"]');
+                onelinkRadios.forEach(radio => {
+                    radio.checked = radio.value === this.settings.onelink.behavior;
+                });
+
+                // Preferred region
+                document.getElementById('preferred-region').value = this.settings.onelink.preferredRegion;
+
+                // Show/hide fixed region group
+                this.toggleFixedRegionGroup();
+
+                // Affiliate programs
+                document.getElementById('enable-amazon').checked = this.settings.affiliate.enabledPrograms.includes('amazon');
+                document.getElementById('enable-homedepot').checked = this.settings.affiliate.enabledPrograms.includes('homedepot');
+
+                // Pricing settings
+                document.getElementById('show-savings').checked = this.settings.pricing.showSavings;
+                document.getElementById('highlight-best-deal').checked = this.settings.pricing.highlightBestDeal;
+                document.getElementById('cache-prices').checked = this.settings.pricing.cachePrices;
+
+                // Privacy settings
+                document.getElementById('track-clicks').checked = this.settings.privacy.trackClicks;
+                document.getElementById('store-search-history').checked = this.settings.privacy.storeSearchHistory;
+                document.getElementById('anonymous-usage').checked = this.settings.privacy.anonymousUsage;
+
+                // Advanced settings
+                document.getElementById('price-alert-threshold').value = this.settings.pricing.alertThreshold;
+                document.getElementById('cache-duration').value = this.settings.pricing.cacheDuration;
+                document.getElementById('default-currency').value = this.settings.pricing.currency;
+
+                // Populate affiliate tags
+                this.populateAffiliateTags();
+            }
+
+            populateAffiliateTags() {
+                const container = document.getElementById('affiliate-tags');
+                const tags = this.settings.affiliate.amazonTags;
+                
+                container.innerHTML = '';
+                
+                Object.entries(tags).forEach(([region, tag], index) => {
+                    const regionNames = {
+                        'amazon.com': '🇺🇸 Amazon US',
+                        'amazon.co.uk': '🇬🇧 Amazon UK',
+                        'amazon.de': '🇩🇪 Amazon Germany',
+                        'amazon.fr': '🇫🇷 Amazon France',
+                        'amazon.es': '🇪🇸 Amazon Spain',
+                        'amazon.it': '🇮🇹 Amazon Italy',
+                        'amazon.ca': '🇨🇦 Amazon Canada',
+                        'amazon.com.au': '🇦🇺 Amazon Australia',
+                        'amazon.co.jp': '🇯🇵 Amazon Japan'
+                    };
+
+                    const regionName = regionNames[region] || region;
+                    const inputId = `affiliate-tag-${region.replace(/\./g, '-')}`;
+
+                    const item = document.createElement('div');
+                    item.className = 'tag-item';
+                    item.innerHTML = `
+                        <label for="${inputId}" class="tag-region">${regionName}</label>
+                        <input type="text" 
+                               id="${inputId}"
+                               class="tag-value" 
+                               value="${tag}" 
+                               data-region="${region}"
+                               title="Affiliate tag for ${regionName}"
+                               placeholder="Enter affiliate tag"
+                               aria-label="Affiliate tag for ${regionName}"
+                               autocomplete="off">
+                    `;
+                    container.appendChild(item);
+                });
+
+                // Bind tag input events
+                container.querySelectorAll('.tag-value').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const region = e.target.dataset.region;
+                        this.settings.affiliate.amazonTags[region] = e.target.value;
+                    });
+                });
+            }
+
+            async loadAnalytics() {
+                try {
+                    const result = await chrome.storage.local.get('clickAnalytics');
+                    const analytics = result.clickAnalytics || [];
+                    
+                    const last30Days = analytics.filter(click => {
+                        const clickDate = new Date(click.timestamp);
+                        const thirtyDaysAgo = new Date();
+                        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                        return clickDate > thirtyDaysAgo;
+                    });
+
+                    const stats = {
+                        totalClicks: last30Days.length,
+                        amazonClicks: last30Days.filter(c => c.retailer === 'amazon').length,
+                        otherClicks: last30Days.filter(c => c.retailer !== 'amazon').length,
+                        uniqueProducts: new Set(last30Days.map(c => c.productTitle)).size
+                    };
+
+                    this.populateAnalytics(stats);
+                } catch (error) {
+                    console.error('Error loading analytics:', error);
+                }
+            }
+
+            populateAnalytics(stats) {
+                const container = document.getElementById('analytics-stats');
+                container.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.totalClicks}</div>
+                        <div class="stat-label">Total Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.amazonClicks}</div>
+                        <div class="stat-label">Amazon Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.otherClicks}</div>
+                        <div class="stat-label">Other Retailers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.uniqueProducts}</div>
+                        <div class="stat-label">Unique Products</div>
+                    </div>
+                `;
+            }
+
+            bindEvents() {
+                // OneLink behavior radio buttons
+                document.querySelectorAll('input[name="onelink-behavior"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        this.settings.onelink.behavior = radio.value;
+                        this.toggleFixedRegionGroup();
+                        this.updateRadioItemStyles();
+                    });
+                });
+
+                // Preferred region
+                document.getElementById('preferred-region').addEventListener('change', (e) => {
+                    this.settings.onelink.preferredRegion = e.target.value;
+                });
+
+                // Affiliate programs
+                document.getElementById('enable-amazon').addEventListener('change', (e) => {
+                    this.updateAffiliatePrograms('amazon', e.target.checked);
+                });
+                document.getElementById('enable-homedepot').addEventListener('change', (e) => {
+                    this.updateAffiliatePrograms('homedepot', e.target.checked);
+                });
+
+                // Pricing settings
+                document.getElementById('show-savings').addEventListener('change', (e) => {
+                    this.settings.pricing.showSavings = e.target.checked;
+                });
+                document.getElementById('highlight-best-deal').addEventListener('change', (e) => {
+                    this.settings.pricing.highlightBestDeal = e.target.checked;
+                });
+                document.getElementById('cache-prices').addEventListener('change', (e) => {
+                    this.settings.pricing.cachePrices = e.target.checked;
+                });
+
+                // Privacy settings
+                document.getElementById('track-clicks').addEventListener('change', (e) => {
+                    this.settings.privacy.trackClicks = e.target.checked;
+                });
+                document.getElementById('store-search-history').addEventListener('change', (e) => {
+                    this.settings.privacy.storeSearchHistory = e.target.checked;
+                });
+                document.getElementById('anonymous-usage').addEventListener('change', (e) => {
+                    this.settings.privacy.anonymousUsage = e.target.checked;
+                });
+
+                // Advanced settings
+                document.getElementById('price-alert-threshold').addEventListener('change', (e) => {
+                    this.settings.pricing.alertThreshold = parseInt(e.target.value);
+                });
+                document.getElementById('cache-duration').addEventListener('change', (e) => {
+                    this.settings.pricing.cacheDuration = parseInt(e.target.value);
+                });
+                document.getElementById('default-currency').addEventListener('change', (e) => {
+                    this.settings.pricing.currency = e.target.value;
+                });
+
+                // Buttons
+                document.getElementById('save-button').addEventListener('click', () => {
+                    this.saveSettings();
+                });
+                
+                document.getElementById('reset-button').addEventListener('click', () => {
+                    if (confirm('Reset all settings to defaults? This cannot be undone.')) {
+                        this.resetToDefaults();
+                    }
+                });
+
+                // Radio item click handlers
+                document.querySelectorAll('.radio-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const radio = item.querySelector('input[type="radio"]');
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change'));
+                    });
+                });
+
+                this.updateRadioItemStyles();
+            }
+
+            updateAffiliatePrograms(program, enabled) {
+                if (enabled && !this.settings.affiliate.enabledPrograms.includes(program)) {
+                    this.settings.affiliate.enabledPrograms.push(program);
+                } else if (!enabled) {
+                    this.settings.affiliate.enabledPrograms = this.settings.affiliate.enabledPrograms.filter(p => p !== program);
+                }
+            }
+
+            toggleFixedRegionGroup() {
+                const fixedRegionGroup = document.getElementById('fixed-region-group');
+                fixedRegionGroup.style.display = this.settings.onelink.behavior === 'fixed' ? 'block' : 'none';
+            }
+
+            updateRadioItemStyles() {
+                document.querySelectorAll('.radio-item').forEach(item => {
+                    const radio = item.querySelector('input[type="radio"]');
+                    item.classList.toggle('active', radio.checked);
+                });
+            }
+
+            resetToDefaults() {
+                this.settings = JSON.parse(JSON.stringify(this.defaultSettings));
+                this.populateUI();
+                this.showNotification('Settings reset to defaults', 'info');
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('save-notification');
+                notification.textContent = type === 'success' ? `✅ ${message}` : 
+                                         type === 'error' ? `❌ ${message}` : 
+                                         `ℹ️ ${message}`;
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                new SettingsManager();
+            });
+        } else {
+            new SettingsManager();
+        }
+    </script>
+</body>
+</html>

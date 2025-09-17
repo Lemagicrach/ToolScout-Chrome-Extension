@@ -1,41 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToolScout - Important Information</title>
     <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #357ABD;
+            --warning-color: #FF9900;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 600px;
             margin: 50px auto;
             padding: 20px;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
         }
+
+        main {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
         .disclosure-box {
             background: #FFF8E1;
-            border: 2px solid #FF9900;
+            border: 2px solid var(--warning-color);
             padding: 20px;
             border-radius: 8px;
+            margin-bottom: 20px;
         }
-        h1 { color: #333; }
-        button {
-            background: #4A90E2;
+
+        p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        strong {
+            font-weight: 600;
+        }
+
+        .cta-button {
+            background: var(--primary-color);
             color: white;
             border: none;
             padding: 12px 30px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
             margin-top: 20px;
+            transition: all 0.2s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: 44px; /* Touch target */
+        }
+
+        .cta-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        .cta-button:focus {
+            outline: 3px solid var(--warning-color);
+            outline-offset: 2px;
+        }
+
+        .icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-list {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .feature-list h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .feature-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: #17BF63;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Accessibility enhancements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (prefers-contrast: high) {
+            .disclosure-box,
+            .cta-button {
+                border-width: 3px;
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 640px) {
+            body {
+                margin: 20px auto;
+                padding: 15px;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+            }
+            
+            main {
+                box-shadow: none;
+            }
+            
+            .cta-button {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to ToolScout!</h1>
-    <div class="disclosure-box">
-        <h2>Affiliate Disclosure</h2>
-        <p><strong>This extension uses Amazon affiliate links.</strong></p>
-        <p>When you click "View Deal on Amazon" and make a purchase, we earn a small commission at no additional cost to you. This helps support the extension's development and keeps it free.</p>
-        <p>Your privacy is important to us. We only track anonymous click data and never collect personal information.</p>
-    </div>
-    <button onclick="window.close()">I Understand</button>
+    <main role="main">
+        <div class="icon" role="img" aria-label="Tools and settings icon">🛠️⚙️</div>
+        
+        <h1>Welcome to ToolScout!</h1>
+        
+        <div class="disclosure-box" role="region" aria-labelledby="disclosure-heading">
+            <h2 id="disclosure-heading">Affiliate Disclosure</h2>
+            <p><strong>This extension uses Amazon affiliate links.</strong></p>
+            <p>When you click "View Deal on Amazon" and make a purchase, we earn a small commission at no additional cost to you. This helps support the extension's development and keeps it free.</p>
+            <p>Your privacy is important to us. We only track anonymous click data and never collect personal information.</p>
+        </div>
+
+        <div class="feature-list" role="region" aria-labelledby="features-heading">
+            <h3 id="features-heading">What ToolScout Does:</h3>
+            <ul role="list">
+                <li>Compares prices across multiple retailers</li>
+                <li>Tracks price changes and sends alerts</li>
+                <li>Finds the best deals automatically</li>
+                <li>Supports Amazon, Home Depot, and more</li>
+                <li>Respects your privacy and data</li>
+            </ul>
+        </div>
+
+        <div class="feature-list" role="region" aria-labelledby="privacy-heading">
+            <h3 id="privacy-heading">Privacy Commitment:</h3>
+            <ul role="list">
+                <li>No personal data collection</li>
+                <li>All data stored locally on your device</li>
+                <li>Anonymous usage statistics only</li>
+                <li>No data sharing with third parties</li>
+                <li>Full transparency in our practices</li>
+            </ul>
+        </div>
+
+        <button type="button" 
+                class="cta-button" 
+                onclick="handleUnderstand()" 
+                aria-label="Close this information page and start using ToolScout">
+            I Understand - Let's Start!
+        </button>
+    </main>
+
+    <script>
+        function handleUnderstand() {
+            // Store that user has acknowledged the disclosure
+            try {
+                if (typeof chrome !== 'undefined' && chrome.storage) {
+                    chrome.storage.local.set({ 
+                        disclosureAccepted: true,
+                        acceptedDate: new Date().toISOString()
+                    }, function() {
+                        if (chrome.runtime.lastError) {
+                            console.log('Storage error:', chrome.runtime.lastError);
+                        } else {
+                            console.log('Disclosure acceptance recorded');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.log('Could not store disclosure acceptance:', error);
+            }
+            
+            // Close the window/tab
+            try {
+                window.close();
+            } catch (error) {
+                // Fallback: redirect to a thank you message
+                document.body.innerHTML = `
+                    <main role="main" style="text-align: center; padding: 50px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+                        <h1>Thank You!</h1>
+                        <p style="font-size: 18px; color: #666;">You can now close this tab and start using ToolScout.</p>
+                        <p style="font-size: 14px; color: #999; margin-top: 20px;">
+                            Click the ToolScout icon in your browser toolbar to get started.
+                        </p>
+                    </main>
+                `;
+            }
+        }
+
+        // Accessibility: Allow Enter key to trigger button
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target === document.querySelector('.cta-button')) {
+                handleUnderstand();
+            }
+        });
+
+        // Enhanced keyboard navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.querySelector('.cta-button');
+            
+            // Ensure button is focusable
+            button.tabIndex = 0;
+            
+            // Add visual feedback for keyboard users
+            button.addEventListener('keydown', function(event) {
+                if (event.key === ' ' || event.key === 'Enter') {
+                    event.preventDefault();
+                    this.style.transform = 'translateY(1px)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                        handleUnderstand();
+                    }, 100);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

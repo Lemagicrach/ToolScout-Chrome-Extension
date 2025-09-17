@@ -10,9 +10,13 @@
     // =================================================================================================
     // AMAZON AFFILIATE CONFIGURATION - CHANGE THIS TO YOUR TAG!
     // =================================================================================================
-    
-    const AMAZON_TAG = 'toolscout20-20'; // ← REPLACE WITH YOUR ACTUAL AMAZON TAG!
-
+    amazonTags: {
+    'amazon.com': 'toolscout-20',      // Replace with your actual tags
+    'amazon.co.uk': 'toolscout-21',   
+    'amazon.de': 'toolscout01-21',
+    // ... etc
+}
+}
     // =================================================================================================
     // UI Elements references
     // =================================================================================================
@@ -259,7 +263,7 @@
         const comparisonContainer = document.createElement('div');
         comparisonContainer.style.cssText = 'margin-top: 10px;';
         
-        comparisons.forEach((comp, index) => {
+        comparisons.forEach((comp) => {
             const item = document.createElement('div');
             item.style.cssText = `
                 padding: 10px;
@@ -505,7 +509,7 @@
     // Initialize
     function initialize() {
         const missingElements = Object.entries(UIElements)
-            .filter(([key, element]) => !element)
+            .filter(([, element]) => !element)
             .map(([key]) => key);
 
         if (missingElements.length > 0) {

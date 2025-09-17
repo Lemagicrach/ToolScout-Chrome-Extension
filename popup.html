@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToolScout</title>
+    <title>ToolScout Price Tracker</title>
     <link rel="stylesheet" href="compact-styles.css">
 </head>
 <body>
-    <div id="app-container">
+    <div id="app-container" role="main" aria-label="ToolScout price comparison tool">
         <!-- Compact Header -->
         <header class="header">
-            <div class="logo">🔧</div>
+            <div class="logo" role="img" aria-label="Tools icon">🔧</div>
             <div class="title-section">
                 <h1>ToolScout</h1>
                 <span class="subtitle">Price Tracker</span>
@@ -18,48 +18,75 @@
         </header>
 
         <!-- Current Product Section -->
-        <div class="current-product">
+        <section class="current-product" aria-labelledby="current-product-heading">
+            <h2 id="current-product-heading" class="sr-only">Current Product Information</h2>
             <div class="product-row">
-                <span class="label">Product:</span>
-                <span id="product-title" class="value">Loading...</span>
+                <span class="label" id="product-label">Product:</span>
+                <span id="product-title" 
+                      class="value" 
+                      aria-labelledby="product-label"
+                      role="text">Loading...</span>
             </div>
             <div class="product-row">
-                <span class="label">Price:</span>
-                <span id="site-price" class="price-value">--</span>
+                <span class="label" id="price-label">Price:</span>
+                <span id="site-price" 
+                      class="price-value" 
+                      aria-labelledby="price-label"
+                      role="text">--</span>
             </div>
-        </div>
+        </section>
 
         <!-- Price Comparisons Section -->
-        <div class="comparisons-section">
-            <h2 class="section-title">
-                <span class="icon">💰</span>
+        <section class="comparisons-section" aria-labelledby="comparisons-heading">
+            <h2 id="comparisons-heading" class="section-title">
+                <span class="icon" role="img" aria-label="Money icon">💰</span>
                 Price Comparisons
             </h2>
             
-            <div id="comparison-list" class="comparison-list">
-                <div class="current-retailer">Current: <span id="current-retailer">Amazon</span></div>
+            <div id="comparison-list" 
+                 class="comparison-list"
+                 role="region"
+                 aria-labelledby="comparisons-heading"
+                 aria-live="polite"
+                 aria-busy="false">
+                
+                <div class="current-retailer">
+                    <span>Current: </span>
+                    <span id="current-retailer" 
+                          role="text" 
+                          aria-label="Current retailer name">Amazon</span>
+                </div>
                 
                 <!-- Comparison Items will be added here by JavaScript -->
-                <div class="loading-state">
+                <div class="loading-state" role="status" aria-live="polite">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="sr-only">Loading price comparisons...</span>
                     Checking other retailers...
                 </div>
             </div>
 
             <!-- Amazon Affiliate Button Container -->
-            <div id="affiliate-container"></div>
-        </div>
+            <div id="affiliate-container" role="region" aria-label="Affiliate deals"></div>
+        </section>
 
         <!-- Alert Button -->
-        <button id="set-alert" class="alert-button" disabled>
-            <span class="button-icon">🔔</span>
+        <button id="set-alert" 
+                class="alert-button" 
+                disabled
+                type="button"
+                aria-label="Set price alert for this product"
+                title="Get notified when the price drops">
+            <span class="button-icon" role="img" aria-label="Bell icon">🔔</span>
             <span class="button-text">Set Price Alert</span>
         </button>
 
-        <div class="disclosure">
-    <strong>Affiliate Disclosure:</strong> This extension uses Amazon affiliate links. 
-    We earn commissions from qualifying purchases at no extra cost to you.
-</div>
+        <!-- Disclosure Section -->
+        <footer class="disclosure" role="contentinfo">
+            <strong>Affiliate Disclosure:</strong> This extension uses Amazon affiliate links. 
+            We earn commissions from qualifying purchases at no extra cost to you.
+        </footer>
+    </div>
 
-<script src="popup.js"></script>
+    <script src="popup.js"></script>
 </body>
 </html>

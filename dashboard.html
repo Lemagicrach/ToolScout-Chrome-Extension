@@ -2,21 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>ToolScout Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolScout Dashboard - Price Tracking Data</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="dashboard">
-    <h1>🧰 ToolScout Data Dashboard</h1>
-    <p><strong>Retailer:</strong> <span id="retailer">Loading...</span></p>
-    <p><strong>Product Title:</strong> <span id="title">Loading...</span></p>
-    <p><strong>Price:</strong> <span id="price">Loading...</span></p>
-    <hr>
-    <h2>💡 Suggested Alternatives</h2>
-    <ul id="comparison-list"></ul>
-  </div>
-  <script src="dashboard.js"></script>
-  <h2>🔔 Active Price Alerts</h2>
-<ul id="alert-list"></ul>
+    <main id="dashboard" role="main">
+        <header>
+            <h1>🧰 ToolScout Data Dashboard</h1>
+        </header>
+        
+        <section class="product-info" aria-labelledby="product-info-heading">
+            <h2 id="product-info-heading" class="sr-only">Product Information</h2>
+            
+            <div class="info-group">
+                <span class="info-label" id="retailer-label"><strong>Retailer:</strong></span>
+                <span id="retailer" 
+                      aria-labelledby="retailer-label"
+                      role="text">Loading...</span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label" id="title-label"><strong>Product Title:</strong></span>
+                <span id="title" 
+                      aria-labelledby="title-label"
+                      role="text">Loading...</span>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label" id="price-label"><strong>Price:</strong></span>
+                <span id="price" 
+                      aria-labelledby="price-label"
+                      role="text">Loading...</span>
+            </div>
+        </section>
+        
+        <hr role="separator" aria-label="Section divider">
+        
+        <section class="alternatives" aria-labelledby="alternatives-heading">
+            <h2 id="alternatives-heading">💡 Suggested Alternatives</h2>
+            <ul id="comparison-list" 
+                role="list"
+                aria-labelledby="alternatives-heading"
+                aria-live="polite">
+                <!-- Comparison items will be populated by JavaScript -->
+            </ul>
+        </section>
+        
+        <section class="alerts" aria-labelledby="alerts-heading">
+            <h2 id="alerts-heading">🔔 Active Price Alerts</h2>
+            <ul id="alert-list" 
+                role="list"
+                aria-labelledby="alerts-heading"
+                aria-live="polite">
+                <!-- Alert items will be populated by JavaScript -->
+            </ul>
+        </section>
+    </main>
+    
+    <script src="dashboard.js"></script>
 </body>
 </html>

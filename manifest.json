@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ToolScout - Price Tracker for Tools",
-  "version": "1.0.4",
-  "description": "Track tool prices and set alerts on Amazon, Home Depot & Leroy Merlin. Save money on power tools!",
+  "name": "ToolScout - Advanced Price Tracker with Amazon Affiliate",
+  "version": "2.0.0",
+  "description": "Smart price tracker with Amazon OneLink, affiliate integration, and multi-retailer comparisons for tools and products.",
   
   "icons": {
     "16": "icons/icon-16.png",
@@ -19,7 +19,7 @@
       "48": "icons/icon-48.png",
       "128": "icons/icon-128.png"
     },
-    "default_title": "ToolScout - Click to view price comparisons"
+    "default_title": "ToolScout - Click to view price comparisons and deals"
   },
 
   "background": {
@@ -36,18 +36,28 @@
         "*://*.amazon.de/*",
         "*://*.amazon.es/*",
         "*://*.amazon.it/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.au/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.in/*",
         "*://*.leroymerlin.fr/*",
+        "*://*.leroymerlin.es/*",
+        "*://*.leroymerlin.it/*",
         "*://*.homedepot.com/*",
-        "*://*.homedepot.ca/*"
+        "*://*.homedepot.ca/*",
+        "*://*.lowes.com/*"
       ],
       "js": ["content-script.js"],
       "run_at": "document_idle"
     }
   ],
 
+  "options_page": "settings.html",
+
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "contextMenus"
   ],
 
   "host_permissions": [
@@ -57,13 +67,50 @@
     "*://*.amazon.de/*",
     "*://*.amazon.es/*",
     "*://*.amazon.it/*",
+    "*://*.amazon.ca/*",
+    "*://*.amazon.com.au/*",
+    "*://*.amazon.co.jp/*",
+    "*://*.amazon.in/*",
     "*://*.leroymerlin.fr/*",
+    "*://*.leroymerlin.es/*",
+    "*://*.leroymerlin.it/*",
     "*://*.homedepot.com/*",
-    "*://*.homedepot.ca/*"
+    "*://*.homedepot.ca/*",
+    "*://*.lowes.com/*",
+    "https://ipapi.co/*"
+  ],
+
+  "commands": {
+    "toggle-toolscout": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+T",
+        "mac": "Command+Shift+T"
+      },
+      "description": "Quick open ToolScout price comparison"
+    },
+    "open-settings": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Open ToolScout settings"
+    }
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*.png",
+        "styles.css",
+        "compact-styles.css"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
 
   "author": "ToolScout Team",
   "short_name": "ToolScout",
   "offline_enabled": false,
-  "incognito": "spanning"
+  "incognito": "spanning",
+  "homepage_url": "https://github.com/Lemagicrach/toolscout-extension"
 }

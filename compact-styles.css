@@ -1,4 +1,4 @@
-/* ToolScout Compact Styles - Professional & Minimal */
+/* ToolScout Compact Styles - Professional & Minimal - FIXED */
 
 * {
     margin: 0;
@@ -12,6 +12,19 @@ body {
     font-size: 13px;
     color: #333;
     background: #ffffff;
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 #app-container {
@@ -140,6 +153,8 @@ body {
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     transition: all 0.2s ease;
+    min-height: 44px; /* Touch target accessibility */
+    cursor: pointer;
 }
 
 .comparison-item:hover {
@@ -154,6 +169,17 @@ body {
     color: #333;
 }
 
+.retailer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.availability {
+    font-size: 10px;
+    color: #17BF63;
+    margin-top: 2px;
+}
+
 .price-info {
     text-align: right;
 }
@@ -164,15 +190,30 @@ body {
     color: #4A90E2;
 }
 
-.savings-badge {
+.savings-badge,
+.savings-amount {
     font-size: 10px;
     color: #17BF63;
     font-weight: 600;
 }
 
+.savings-negative {
+    color: #e53e3e;
+}
+
+.savings-positive {
+    color: #17BF63;
+}
+
 .higher-price {
     color: #999;
     text-decoration: line-through;
+}
+
+/* Best Deal Styling */
+.best-deal {
+    border-color: #17BF63;
+    background: rgba(23, 191, 99, 0.05);
 }
 
 /* Amazon Affiliate Button */
@@ -197,6 +238,9 @@ body {
     border-radius: 20px;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+    border: none;
+    cursor: pointer;
+    min-height: 44px; /* Touch target accessibility */
 }
 
 .amazon-button:hover {
@@ -204,11 +248,17 @@ body {
     box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
 }
 
+.amazon-button:focus {
+    outline: 3px solid #4A90E2;
+    outline-offset: 2px;
+}
+
 .affiliate-disclaimer {
     font-size: 9px;
     color: #888;
     text-align: center;
     margin-top: 6px;
+    line-height: 1.3;
 }
 
 /* Alert Button */
@@ -228,11 +278,17 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
+    min-height: 44px; /* Touch target accessibility */
 }
 
 .alert-button:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.alert-button:focus {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
 }
 
 .alert-button:disabled {
@@ -245,6 +301,10 @@ body {
     font-size: 14px;
 }
 
+.button-text {
+    flex: 1;
+}
+
 /* Loading State */
 .loading-state {
     text-align: center;
@@ -252,6 +312,10 @@ body {
     font-style: italic;
     font-size: 12px;
     padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .loading-spinner {
@@ -262,7 +326,6 @@ body {
     border-radius: 50%;
     border-top-color: #4A90E2;
     animation: spin 1s ease-in-out infinite;
-    margin-right: 6px;
 }
 
 @keyframes spin {
@@ -281,6 +344,36 @@ body {
     margin: 8px 0;
 }
 
+/* Instructions */
+.instructions {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.instructions h3 {
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.instructions ol {
+    color: #666;
+    font-size: 12px;
+    padding-left: 16px;
+    margin-bottom: 12px;
+}
+
+.instructions ol li {
+    margin-bottom: 4px;
+}
+
+.instructions p {
+    color: #666;
+    font-size: 12px;
+}
+
 /* Disclosure */
 .disclosure {
     padding: 10px;
@@ -289,8 +382,8 @@ body {
     font-size: 11px;
     color: #F57C00;
     font-weight: 500;
+    line-height: 1.3;
 }
-
 
 /* Error State */
 .error-message {
@@ -301,6 +394,7 @@ body {
     background: #fed7d7;
     border-radius: 6px;
     margin: 8px 0;
+    border: 1px solid #feb2b2;
 }
 
 /* Success State */
@@ -312,6 +406,76 @@ body {
     background: #c6f6d5;
     border-radius: 6px;
     margin: 8px 0;
+    border: 1px solid #9ae6b4;
+}
+
+/* =================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ================================================================= */
+
+/* Focus Management */
+button:focus,
+input:focus,
+select:focus,
+a:focus,
+[tabindex="0"]:focus,
+[role="button"]:focus {
+    outline: 3px solid #4A90E2 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px rgba(74, 144, 226, 0.3) !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .comparison-item {
+        border-width: 2px !important;
+        border-color: currentColor !important;
+    }
+    
+    .amazon-button,
+    .alert-button {
+        border: 2px solid currentColor !important;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .loading-spinner {
+        animation: none !important;
+        border: 2px solid #4A90E2;
+        border-radius: 50%;
+    }
+}
+
+/* Better Color Contrast */
+.help-text,
+.affiliate-disclaimer {
+    color: #4a5568 !important; /* Better contrast */
+}
+
+/* Skip Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 10000;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 6px;
 }
 
 /* Responsive adjustments */
@@ -322,5 +486,37 @@ body {
     
     #app-container {
         border-radius: 0;
+    }
+    
+    .comparison-item {
+        padding: 12px 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        text-align: left;
+    }
+    
+    .price-info {
+        text-align: left;
+        width: 100%;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .loading-spinner,
+    .amazon-button,
+    .alert-button {
+        display: none !important;
+    }
+    
+    body {
+        width: auto;
+        background: white;
+    }
+    
+    #app-container {
+        box-shadow: none;
+        border: 1px solid #ccc;
     }
 }
