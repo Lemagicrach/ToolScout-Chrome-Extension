@@ -37,18 +37,21 @@ const DEFAULT_SETTINGS = {
     },
     affiliate: {
         enabledPrograms: ['amazon'],
-        amazonTags: {
-            'amazon.com': 'toolscout-20',
-            'amazon.co.uk': 'toolscout-21',
-            'amazon.de': 'toolscout01-21',
-            'amazon.fr': 'toolscout08-21',
-            'amazon.es': 'toolscout04-21',
-            'amazon.it': 'toolscout01-21',
-            'amazon.ca': 'toolscout0c-20',
-            'amazon.com.au': 'toolscout-22',
-            'amazon.co.jp': 'toolscout-22',
-            'amazon.in': 'toolscout-21'
-        }
+   amazonTags: {
+    // Use your main tracking ID for all regions
+    // OneLink will handle the redirection automatically
+    'amazon.com': 'toolscout20-20',
+    'amazon.co.uk': 'toolscout20-20',
+    'amazon.de': 'toolscout20-20',
+    'amazon.fr': 'toolscout20-20',
+    'amazon.es': 'toolscout20-20',
+    'amazon.ae': 'toolscout20-20',
+    'amazon.it': 'toolscout20-20',
+    'amazon.ca': 'toolscout20-20',
+    'amazon.com.au': 'toolscout20-20',
+    'amazon.co.jp': 'toolscout20-20',
+    'amazon.in': 'toolscout20-20'
+}
     },
     pricing: {
         showSavings: true,
