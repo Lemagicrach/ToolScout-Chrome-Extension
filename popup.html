@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolScout</title>
+    <link rel="stylesheet" href="compact-styles.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Compact Header -->
+        <header class="header">
+            <div class="logo">🔧</div>
+            <div class="title-section">
+                <h1>ToolScout</h1>
+                <span class="subtitle">Price Tracker</span>
+            </div>
+        </header>
+
+        <!-- Current Product Section -->
+        <div class="current-product">
+            <div class="product-row">
+                <span class="label">Product:</span>
+                <span id="product-title" class="value">Loading...</span>
+            </div>
+            <div class="product-row">
+                <span class="label">Price:</span>
+                <span id="site-price" class="price-value">--</span>
+            </div>
+        </div>
+
+        <!-- Price Comparisons Section -->
+        <div class="comparisons-section">
+            <h2 class="section-title">
+                <span class="icon">💰</span>
+                Price Comparisons
+            </h2>
+            
+            <div id="comparison-list" class="comparison-list">
+                <div class="current-retailer">Current: <span id="current-retailer">Amazon</span></div>
+                
+                <!-- Comparison Items will be added here by JavaScript -->
+                <div class="loading-state">
+                    Checking other retailers...
+                </div>
+            </div>
+
+            <!-- Amazon Affiliate Button Container -->
+            <div id="affiliate-container"></div>
+        </div>
+
+        <!-- Alert Button -->
+        <button id="set-alert" class="alert-button" disabled>
+            <span class="button-icon">🔔</span>
+            <span class="button-text">Set Price Alert</span>
+        </button>
+
+        <div class="disclosure">
+    <strong>Affiliate Disclosure:</strong> This extension uses Amazon affiliate links. 
+    We earn commissions from qualifying purchases at no extra cost to you.
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
