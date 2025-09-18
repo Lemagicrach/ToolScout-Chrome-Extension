@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ToolScout - Advanced Price Tracker with Amazon Affiliate",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Smart price tracker with Amazon OneLink, affiliate integration, and multi-retailer comparisons for tools and products.",
   
   "icons": {
@@ -30,22 +30,20 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.amazon.fr/*",
-        "*://*.amazon.com/*",
-        "*://*.amazon.co.uk/*",
-        "*://*.amazon.de/*",
-        "*://*.amazon.es/*",
-        "*://*.amazon.it/*",
-        "*://*.amazon.ca/*",
-        "*://*.amazon.com.au/*",
-        "*://*.amazon.co.jp/*",
-        "*://*.amazon.in/*",
-        "*://*.leroymerlin.fr/*",
-        "*://*.leroymerlin.es/*",
-        "*://*.leroymerlin.it/*",
-        "*://*.homedepot.com/*",
-        "*://*.homedepot.ca/*",
-        "*://*.lowes.com/*"
+        "https://www.amazon.com/*",
+        "https://www.amazon.co.uk/*",
+        "https://www.amazon.de/*",
+        "https://www.amazon.fr/*",
+        "https://www.amazon.es/*",
+        "https://www.amazon.it/*",
+        "https://www.amazon.ca/*",
+        "https://www.amazon.com.au/*",
+        "https://www.amazon.co.jp/*",
+        "https://www.amazon.in/*",
+        "https://www.amazon.ae/*",
+        "https://www.leroymerlin.fr/*",
+        "https://www.homedepot.com/*",
+        "https://www.lowes.com/*"
       ],
       "js": ["content-script.js"],
       "run_at": "document_idle"
@@ -57,28 +55,31 @@
   "permissions": [
     "storage",
     "activeTab",
-    "contextMenus"
+    "contextMenus",
+    "alarms"
   ],
 
   "host_permissions": [
-    "*://*.amazon.fr/*",
-    "*://*.amazon.com/*",
-    "*://*.amazon.co.uk/*",
-    "*://*.amazon.de/*",
-    "*://*.amazon.es/*",
-    "*://*.amazon.it/*",
-    "*://*.amazon.ca/*",
-    "*://*.amazon.com.au/*",
-    "*://*.amazon.co.jp/*",
-    "*://*.amazon.in/*",
-    "*://*.leroymerlin.fr/*",
-    "*://*.leroymerlin.es/*",
-    "*://*.leroymerlin.it/*",
-    "*://*.homedepot.com/*",
-    "*://*.homedepot.ca/*",
-    "*://*.lowes.com/*",
-    "https://ipapi.co/*"
+    "https://www.amazon.com/*",
+    "https://www.amazon.co.uk/*",
+    "https://www.amazon.de/*",
+    "https://www.amazon.fr/*",
+    "https://www.amazon.es/*",
+    "https://www.amazon.it/*",
+    "https://www.amazon.ca/*",
+    "https://www.amazon.com.au/*",
+    "https://www.amazon.co.jp/*",
+    "https://www.amazon.in/*",
+    "https://www.amazon.ae/*",
+    "https://www.leroymerlin.fr/*",
+    "https://www.homedepot.com/*",
+    "https://www.lowes.com/*",
+    "https://ipapi.co/json/"
   ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://ipapi.co https://www.amazon.com https://*.amazon.com https://*.amazon.co.uk https://*.amazon.de https://*.amazon.fr https://*.amazon.es https://*.amazon.it https://*.amazon.ca https://*.amazon.com.au https://*.amazon.co.jp https://*.amazon.in https://*.amazon.ae;"
+  },
 
   "commands": {
     "toggle-toolscout": {
@@ -112,5 +113,17 @@
   "short_name": "ToolScout",
   "offline_enabled": false,
   "incognito": "spanning",
-  "homepage_url": "https://github.com/Lemagicrach/toolscout-extension"
+  "homepage_url": "https://github.com/Lemagicrach/toolscout-extension",
+  
+  "minimum_chrome_version": "88",
+  
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
 }
