@@ -12,6 +12,17 @@
     --error-red: #E0245E;
     --amazon-orange: #FF9900;
     --amazon-dark: #FF6600;
+        /* Keep your existing variables and add these */
+    --affiliate-orange: #FF9900;
+    --affiliate-dark: #FF6600;
+    --confidence-high: #17BF63;
+    --confidence-medium: #FF9900;
+    --confidence-low: #E0245E;
+    --savings-positive: #e8f5e8;
+    --savings-negative: #ffeaea;
+    --border-radius: 8px;
+    --transition: all 0.2s ease;
+
 }
 
 * {
