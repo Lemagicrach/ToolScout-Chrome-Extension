@@ -56,7 +56,8 @@
     "storage",
     "activeTab",
     "contextMenus",
-    "alarms"
+    "alarms",
+    "declarativeNetRequest"
   ],
 
   "host_permissions": [
