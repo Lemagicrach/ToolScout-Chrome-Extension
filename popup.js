@@ -1,5 +1,6 @@
 /**
- * ToolScout Popup Script with eBay Integration
+ * ToolScout Premium Popup Script
+ * Enhanced with smooth animations and modern interactions
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const alertsList = document.getElementById('alertsList');
   const alertPriceInput = document.getElementById('alertPriceInput');
   const setAlertButton = document.getElementById('setAlertButton');
+  const settingsBtn = document.getElementById('settingsBtn');
   
   let currentProduct = null;
   let currentSearchResults = [];
@@ -27,6 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
     checkCurrentPage();
     loadAlerts();
     setupEventListeners();
+    animateEntrance();
+  }
+
+  // =================================================================================================
+  // Animations
+  // =================================================================================================
+
+  function animateEntrance() {
+    // Add slide-in animation to cards on load
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        card.classList.add('slide-in');
+      }, index * 100);
+    });
   }
 
   // =================================================================================================
@@ -34,14 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // =================================================================================================
 
   function setupEventListeners() {
-    // Tab switching
+    // Tab switching with smooth transitions
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
         const tabName = tab.dataset.tab;
-        handleTabSwitch(tabName);
+        switchTab(tabName);
       });
     });
 
@@ -52,42 +66,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Compare button
-    compareButton.addEventListener('click', compareCurrentProduct);
+    if (compareButton) {
+      compareButton.addEventListener('click', compareCurrentProduct);
+    }
 
     // Alert functionality
-    setAlertButton.addEventListener('click', setNewAlert);
+    if (setAlertButton) {
+      setAlertButton.addEventListener('click', setNewAlert);
+    }
+
+    // Settings button
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        chrome.runtime.openOptionsPage();
+      });
+    }
   }
 
   // =================================================================================================
   // Tab Management
   // =================================================================================================
 
-  function handleTabSwitch(tabName) {
-    // Hide all sections first
-    searchSection.style.display = 'none';
-    alertSection.classList.remove('active');
-    currentProductSection.style.display = 'none';
-    resultsSection.style.display = 'none';
+  function switchTab(tabName) {
+    // Update active tab
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      if (t.dataset.tab === tabName) {
+        t.classList.add('active');
+      }
+    });
 
-    switch(tabName) {
-      case 'search':
-        searchSection.style.display = 'block';
-        break;
-      case 'alerts':
-        alertSection.classList.add('active');
-        loadAlerts();
-        break;
-      case 'current':
-        if (currentProduct) {
-          currentProductSection.style.display = 'block';
-        } else {
-          currentProductSection.style.display = 'block';
-          document.getElementById('currentTitle').textContent = 'No product detected on current page';
-          document.getElementById('currentPrice').textContent = '--';
-          compareButton.style.display = 'none';
-        }
-        break;
-    }
+    // Hide all sections with fade effect
+    const sections = [searchSection, alertSection, currentProductSection];
+    sections.forEach(section => {
+      if (section) {
+        section.classList.add('hidden');
+      }
+    });
+
+    // Show appropriate section with animation
+    setTimeout(() => {
+      switch(tabName) {
+        case 'search':
+          searchSection.classList.remove('hidden');
+          searchSection.classList.add('slide-in');
+          resultsSection.classList.remove('hidden');
+          break;
+        case 'alerts':
+          alertSection.classList.remove('hidden');
+          alertSection.classList.add('slide-in');
+          loadAlerts();
+          break;
+        case 'current':
+          if (currentProduct) {
+            currentProductSection.classList.remove('hidden');
+            currentProductSection.classList.add('slide-in');
+          } else {
+            currentProductSection.classList.remove('hidden');
+            currentProductSection.classList.add('slide-in');
+            document.getElementById('currentTitle').textContent = 'No product detected on current page';
+            document.getElementById('currentPrice').textContent = '--';
+            if (compareButton) compareButton.style.display = 'none';
+          }
+          break;
+      }
+    }, 100);
   }
 
   // =================================================================================================
@@ -132,10 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('currentPrice').textContent = currentProduct.price ? `$${currentProduct.price}` : 'Price unavailable';
     
     const retailerBadge = document.getElementById('currentRetailer');
-    retailerBadge.textContent = currentProduct.retailer;
+    retailerBadge.textContent = currentProduct.retailer.toUpperCase();
     retailerBadge.className = `retailer-badge retailer-${currentProduct.retailer}`;
     
-    compareButton.style.display = 'block';
+    if (compareButton) compareButton.style.display = 'block';
   }
 
   // =================================================================================================
@@ -144,17 +187,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function performSearch() {
     const query = searchInput.value.trim();
-    if (!query) return;
+    if (!query) {
+      showError('Please enter a search term');
+      return;
+    }
     
     searchButton.disabled = true;
-    searchButton.textContent = 'Searching...';
+    searchButton.innerHTML = '<span>Searching...</span>';
     
     // Show loading state
-    resultsSection.style.display = 'block';
-    resultsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Searching all retailers...</div>';
+    resultsSection.classList.remove('hidden');
+    resultsList.innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Searching all retailers...</div>
+      </div>
+    `;
     
     try {
-      // Search eBay
+      // Search eBay (as implemented)
       const response = await chrome.runtime.sendMessage({
         action: 'searchEbay',
         keyword: query,
@@ -176,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showError('An error occurred during search.');
     } finally {
       searchButton.disabled = false;
-      searchButton.textContent = 'Search All Retailers';
+      searchButton.innerHTML = '<span>Search All Retailers</span>';
     }
   }
 
@@ -184,11 +235,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!currentProduct) return;
     
     compareButton.disabled = true;
-    compareButton.textContent = 'Comparing...';
+    compareButton.innerHTML = '<span>Comparing...</span>';
     
     // Show loading state
-    resultsSection.style.display = 'block';
-    resultsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Finding best prices...</div>';
+    resultsSection.classList.remove('hidden');
+    resultsList.innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Finding best prices...</div>
+      </div>
+    `;
     
     try {
       // Extract brand and product name from title
@@ -213,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showError('Failed to compare prices.');
     } finally {
       compareButton.disabled = false;
-      compareButton.textContent = 'Compare Prices Across All Stores';
+      compareButton.innerHTML = '<span>Compare Prices Across All Stores</span>';
     }
   }
 
@@ -223,7 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function displayResults(results) {
     if (!results || results.length === 0) {
-      resultsList.innerHTML = '<div class="no-results">No results found. Try a different search term.</div>';
+      resultsList.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-icon">🔍</div>
+          <div>No results found. Try a different search term.</div>
+        </div>
+      `;
       return;
     }
     
@@ -237,21 +298,32 @@ document.addEventListener('DOMContentLoaded', () => {
       
       html += `
         <div class="result-item" data-url="${item.url}">
-          <div class="result-header">
+          ${isBestDeal ? '<div class="best-deal">Best Deal</div>' : ''}
+          <div class="result-header-row">
             <div>
-              <span class="result-retailer retailer-ebay">eBay</span>
-              ${isBestDeal ? '<span class="best-deal">Best Deal</span>' : ''}
+              <span class="retailer-badge retailer-ebay">
+                <span>📦</span>
+                <span>eBay</span>
+              </span>
             </div>
             <div class="result-price">$${totalPrice.toFixed(2)}</div>
           </div>
           <div class="result-title">${item.title}</div>
           <div class="result-details">
-            <span class="result-condition">${item.condition}</span>
-            <span class="result-shipping">
-              ${item.shipping > 0 ? `+$${item.shipping.toFixed(2)} shipping` : 'Free shipping'}
+            <span class="detail-badge">
+              <span>✅</span>
+              <span>${item.condition}</span>
             </span>
-            <span>${item.type}</span>
-            ${item.seller ? `<span>Seller: ${item.seller.username} (${item.seller.rating}%)</span>` : ''}
+            <span class="detail-badge shipping-badge">
+              <span>📦</span>
+              <span>${item.shipping > 0 ? `+$${item.shipping.toFixed(2)} shipping` : 'Free shipping'}</span>
+            </span>
+            ${item.seller ? `
+              <span class="detail-badge">
+                <span>⭐</span>
+                <span>${item.seller.rating}%</span>
+              </span>
+            ` : ''}
           </div>
         </div>
       `;
@@ -259,8 +331,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     resultsList.innerHTML = html;
     
+    // Add smooth entrance animation
+    const items = document.querySelectorAll('.result-item');
+    items.forEach((item, index) => {
+      setTimeout(() => {
+        item.classList.add('slide-in');
+      }, index * 50);
+    });
+    
     // Add click handlers to open items
-    document.querySelectorAll('.result-item').forEach(item => {
+    items.forEach(item => {
       item.addEventListener('click', () => {
         const url = item.dataset.url;
         if (url) chrome.tabs.create({ url });
@@ -269,7 +349,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showError(message) {
-    resultsList.innerHTML = `<div class="error-message">${message}</div>`;
+    resultsList.innerHTML = `
+      <div class="no-results">
+        <div class="no-results-icon">⚠️</div>
+        <div>${message}</div>
+      </div>
+    `;
   }
 
   // =================================================================================================
@@ -282,27 +367,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (response.success && response.alerts.length > 0) {
       displayAlerts(response.alerts);
     } else {
-      alertsList.innerHTML = '<div class="no-results">No price alerts set. Search for a product and set your target price!</div>';
+      alertsList.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-icon">🔔</div>
+          <div>No price alerts set. Search for a product and set your target price!</div>
+        </div>
+      `;
     }
   }
 
   function displayAlerts(alerts) {
     let html = '';
     alerts.forEach(alert => {
-      const statusClass = alert.triggered ? 'triggered' : 'active';
       const statusText = alert.triggered ? 
         `✅ Triggered at $${alert.triggeredPrice}` : 
         `⏰ Watching for $${alert.targetPrice}`;
       
       html += `
-        <div class="result-item">
-          <div class="result-header">
-            <div class="result-title" style="color: #333;">${alert.productName}</div>
-            <button class="delete-alert" data-id="${alert.id}" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">×</button>
+        <div class="alert-item">
+          <button class="delete-alert" data-id="${alert.id}">×</button>
+          <div class="alert-product-name">
+            ${alert.productName}
           </div>
-          <div class="result-details">
-            <span>${statusText}</span>
-            <span>Created: ${new Date(alert.createdAt).toLocaleDateString()}</span>
+          <div class="alert-product-status">
+            ${statusText} • Created ${new Date(alert.createdAt).toLocaleDateString()}
           </div>
         </div>
       `;
@@ -315,11 +403,17 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const alertId = btn.dataset.id;
-        await chrome.runtime.sendMessage({ 
-          action: 'deleteAlert', 
-          alertId 
-        });
-        loadAlerts();
+        
+        // Add rotation animation before delete
+        btn.classList.add('rotating');
+        
+        setTimeout(async () => {
+          await chrome.runtime.sendMessage({ 
+            action: 'deleteAlert', 
+            alertId 
+          });
+          loadAlerts();
+        }, 300);
       });
     });
   }
@@ -329,9 +423,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const productName = searchInput.value.trim() || (currentProduct && currentProduct.title);
     
     if (!productName || !targetPrice) {
-      alert('Please enter a product name and target price');
+      showNotification('Please enter a product name and target price', 'error');
       return;
     }
+    
+    setAlertButton.disabled = true;
+    setAlertButton.textContent = 'Setting Alert...';
     
     const response = await chrome.runtime.sendMessage({
       action: 'saveAlert',
@@ -345,10 +442,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (response.success) {
       alertPriceInput.value = '';
-      alert(`Price alert set! We'll notify you when ${productName} drops below $${targetPrice}`);
+      showNotification(`Price alert set! We'll notify you when ${productName} drops below $${targetPrice}`, 'success');
       loadAlerts();
     } else {
-      alert(response.error || 'Failed to set alert');
+      showNotification(response.error || 'Failed to set alert', 'error');
     }
+    
+    setAlertButton.disabled = false;
+    setAlertButton.textContent = 'Set Price Alert';
+  }
+
+  // =================================================================================================
+  // Utility Functions
+  // =================================================================================================
+
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.classList.add('slide-up');
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 });
