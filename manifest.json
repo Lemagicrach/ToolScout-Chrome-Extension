@@ -1,16 +1,36 @@
 {
   "manifest_version": 3,
-  "name": "ToolScout - Advanced Price Tracker",
-  "version": "2.1.1",
-  "description": "Smart price tracker with OneLink, affiliate integration, and multi-retailer comparisons for tools and products.",
+  "name": "ToolScout - Price Comparison Assistant",
+  "version": "2.0.0",
+  "description": "Compare tool prices across Amazon, Home Depot, Leroy Merlin, and eBay. Track prices and get alerts.",
   
-  "icons": {
-    "16": "icons/icon-16.png",
-    "32": "icons/icon-32.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+  "permissions": [
+    "storage",
+    "notifications",
+    "alarms",
+    "tabs",
+    "activeTab"
+  ],
+  
+  "host_permissions": [
+    "*://*.amazon.com/*",
+    "*://*.amazon.ca/*",
+    "*://*.amazon.co.uk/*",
+    "*://*.homedepot.com/*",
+    "*://*.homedepot.ca/*",
+    "*://*.leroymerlin.fr/*",
+    "*://*.ebay.com/*",
+    "*://*.ebay.ca/*",
+    "*://*.ebay.co.uk/*",
+    "*://svcs.ebay.com/*",
+    "*://api.ebay.com/*",
+    "*://open.api.ebay.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
   },
-
+  
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -19,112 +39,52 @@
       "48": "icons/icon-48.png",
       "128": "icons/icon-128.png"
     },
-    "default_title": "ToolScout - Click to view price comparisons and deals"
+    "default_title": "ToolScout - Compare Tool Prices"
   },
-
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-
+  
   "content_scripts": [
     {
       "matches": [
-        "https://www.amazon.com/*",
-        "https://www.amazon.co.uk/*",
-        "https://www.amazon.de/*",
-        "https://www.amazon.fr/*",
-        "https://www.amazon.es/*",
-        "https://www.amazon.it/*",
-        "https://www.amazon.ca/*",
-        "https://www.amazon.com.au/*",
-        "https://www.amazon.co.jp/*",
-        "https://www.amazon.in/*",
-        "https://www.amazon.ae/*",
-        "https://www.leroymerlin.fr/*",
-        "https://www.homedepot.com/*",
-        "https://www.lowes.com/*"
+        "*://*.amazon.com/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.homedepot.com/*",
+        "*://*.homedepot.ca/*",
+        "*://*.leroymerlin.fr/*",
+        "*://*.ebay.com/*",
+        "*://*.ebay.ca/*",
+        "*://*.ebay.co.uk/*"
       ],
-      "js": ["content-script.js"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],
-
-  "options_page": "settings.html",
-
-  "permissions": [
-    "storage",
-    "activeTab",
-    "contextMenus",
-    "alarms",
-    "declarativeNetRequest"
-  ],
-
-  "host_permissions": [
-    "https://www.amazon.com/*",
-    "https://www.amazon.co.uk/*",
-    "https://www.amazon.de/*",
-    "https://www.amazon.fr/*",
-    "https://www.amazon.es/*",
-    "https://www.amazon.it/*",
-    "https://www.amazon.ca/*",
-    "https://www.amazon.com.au/*",
-    "https://www.amazon.co.jp/*",
-    "https://www.amazon.in/*",
-    "https://www.amazon.ae/*",
-    "https://www.leroymerlin.fr/*",
-    "https://www.homedepot.com/*",
-    "https://www.lowes.com/*",
-    "https://ipapi.co/json/"
-  ],
-
+  
+  "icons": {
+    "16": "icons/icon-16.png",
+    "19": "icons/icon-19.png",
+    "32": "icons/icon-32.png",
+    "38": "icons/icon-38.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  
+  "author": "ToolScout Team",
+  "homepage_url": "https://github.com/yourusername/toolscout",
+  "short_name": "ToolScout",
+  
+  "offline_enabled": false,
+  
+  "incognito": "spanning",
+  
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://ipapi.co https://www.amazon.com https://*.amazon.com https://*.amazon.co.uk https://*.amazon.de https://*.amazon.fr https://*.amazon.es https://*.amazon.it https://*.amazon.ca https://*.amazon.com.au https://*.amazon.co.jp https://*.amazon.in https://*.amazon.ae;"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   },
-
-  "commands": {
-    "toggle-toolscout": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+T",
-        "mac": "Command+Shift+T"
-      },
-      "description": "Quick open ToolScout price comparison"
-    },
-    "open-settings": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+S",
-        "mac": "Command+Shift+S"
-      },
-      "description": "Open ToolScout settings"
-    }
-  },
-
+  
   "web_accessible_resources": [
     {
-      "resources": [
-        "icons/*.png",
-        "styles.css",
-        "compact-styles.css"
-      ],
+      "resources": ["icons/*"],
       "matches": ["<all_urls>"]
     }
-  ],
-
-  "author": "ToolScout Team",
-  "short_name": "ToolScout",
-  "offline_enabled": false,
-  "incognito": "spanning",
-  "homepage_url": "https://github.com/Lemagicrach/toolscout-extension",
-  
-  "minimum_chrome_version": "88",
-  
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "ruleset_1",
-        "enabled": true,
-        "path": "rules.json"
-      }
-    ]
-  }
+  ]
 }

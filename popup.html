@@ -1,92 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToolScout Price Tracker</title>
-    <link rel="stylesheet" href="compact-styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToolScout - Price Comparison</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 420px;
+      min-height: 500px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px;
+      border-bottom: 2px solid #667eea;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #333;
+      flex-grow: 1;
+    }
+
+    .main-content {
+      padding: 15px;
+    }
+
+    .current-product {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .product-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .retailer-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .retailer-amazon { background: #FF9900; color: white; }
+    .retailer-homedepot { background: #F96302; color: white; }
+    .retailer-leroymerlin { background: #00A651; color: white; }
+    .retailer-ebay { background: #0064D2; color: white; }
+
+    .current-price {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    .search-section {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .search-button {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .search-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .search-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .comparison-results {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .results-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .result-item {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .result-item:hover {
+      background: #f8f9fa;
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 5px;
+    }
+
+    .result-retailer {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .result-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    .result-title {
+      font-size: 13px;
+      color: #666;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+
+    .result-details {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: #999;
+    }
+
+    .result-condition {
+      padding: 2px 5px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 3px;
+    }
+
+    .result-shipping {
+      color: #666;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+    }
+
+    .error-message {
+      background: #fee;
+      color: #c33;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .price-alert-section {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .price-alert-section.active {
+      display: block;
+    }
+
+    .alert-input {
+      width: 100%;
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .set-alert-button {
+      width: 100%;
+      padding: 8px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .best-deal {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      color: white;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-left: 5px;
+      text-transform: uppercase;
+    }
+  </style>
 </head>
 <body>
-    <div id="app-container" role="main" aria-label="ToolScout price comparison tool">
-        <!-- Compact Header -->
-        <header class="header">
-            <div class="logo" role="img" aria-label="Tools icon">🔧</div>
-            <div class="title-section">
-                <h1>ToolScout</h1>
-                <span class="subtitle">Price Tracker</span>
-            </div>
-        </header>
+  <div class="header">
+    <div class="logo">🔧</div>
+    <h1>ToolScout</h1>
+    <button id="settingsBtn" style="background: none; border: none; cursor: pointer; font-size: 20px;">⚙️</button>
+  </div>
 
-        <!-- Current Product Section -->
-        <section class="current-product" aria-labelledby="current-product-heading">
-            <h2 id="current-product-heading" class="sr-only">Current Product Information</h2>
-            <div class="product-row">
-                <span class="label" id="product-label">Product:</span>
-                <span id="product-title" 
-                      class="value" 
-                      aria-labelledby="product-label"
-                      role="text">Loading...</span>
-            </div>
-            <div class="product-row">
-                <span class="label" id="price-label">Price:</span>
-                <span id="site-price" 
-                      class="price-value" 
-                      aria-labelledby="price-label"
-                      role="text">--</span>
-            </div>
-        </section>
-
-        <!-- Price Comparisons Section -->
-        <section class="comparisons-section" aria-labelledby="comparisons-heading">
-            <h2 id="comparisons-heading" class="section-title">
-                <span class="icon" role="img" aria-label="Money icon">💰</span>
-                Price Comparisons
-            </h2>
-            
-            <div id="comparison-list" 
-                 class="comparison-list"
-                 role="region"
-                 aria-labelledby="comparisons-heading"
-                 aria-live="polite"
-                 aria-busy="false">
-                
-                <div class="current-retailer">
-                    <span>Current: </span>
-                    <span id="current-retailer" 
-                          role="text" 
-                          aria-label="Current retailer name">Amazon</span>
-                </div>
-                
-                <!-- Comparison Items will be added here by JavaScript -->
-                <div class="loading-state" role="status" aria-live="polite">
-                    <span class="loading-spinner" aria-hidden="true"></span>
-                    <span class="sr-only">Loading price comparisons...</span>
-                    Checking other retailers...
-                </div>
-            </div>
-
-            <!-- Amazon Affiliate Button Container -->
-            <div id="affiliate-container" role="region" aria-label="Affiliate deals"></div>
-        </section>
-
-        <!-- Alert Button -->
-        <button id="set-alert" 
-                class="alert-button" 
-                disabled
-                type="button"
-                aria-label="Set price alert for this product"
-                title="Get notified when the price drops">
-            <span class="button-icon" role="img" aria-label="Bell icon">🔔</span>
-            <span class="button-text">Set Price Alert</span>
-        </button>
-
-        <!-- Disclosure Section -->
-        <footer class="disclosure" role="contentinfo">
-            <strong>Affiliate Disclosure:</strong> This extension uses Amazon affiliate links. 
-            We earn commissions from qualifying purchases at no extra cost to you.
-        </footer>
+  <div class="main-content">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="search">🔍 Search</button>
+      <button class="tab" data-tab="alerts">🔔 Alerts</button>
+      <button class="tab" data-tab="current">📍 Current Page</button>
     </div>
 
-    <script src="popup.js"></script>
+    <!-- Current Product Section -->
+    <div class="current-product" id="currentProductSection" style="display: none;">
+      <div class="product-title" id="currentTitle">No product detected</div>
+      <div class="product-info">
+        <span class="retailer-badge" id="currentRetailer">Unknown</span>
+        <span class="current-price" id="currentPrice">--</span>
+      </div>
+      <button class="search-button" id="compareButton">
+        Compare Prices Across All Stores
+      </button>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section" id="searchSection">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search for tools (e.g., DeWalt drill, Makita saw)">
+      <button class="search-button" id="searchButton">
+        Search All Retailers
+      </button>
+    </div>
+
+    <!-- Price Alert Section -->
+    <div class="price-alert-section" id="alertSection">
+      <div class="results-header">⏰ Your Price Alerts</div>
+      <div id="alertsList"></div>
+      <input type="number" class="alert-input" id="alertPriceInput" placeholder="Target price (e.g., 99.99)">
+      <button class="set-alert-button" id="setAlertButton">
+        Set Price Alert
+      </button>
+    </div>
+
+    <!-- Comparison Results -->
+    <div class="comparison-results" id="resultsSection" style="display: none;">
+      <div class="results-header">
+        <span>📊 Price Comparison Results</span>
+      </div>
+      <div id="resultsList"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
 </body>
 </html>
