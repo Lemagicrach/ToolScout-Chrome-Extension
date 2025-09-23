@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ToolScout - Price Comparison Assistant",
-  "version": "2.0.0",
+  "version": "2.1.2",
   "description": "Compare tool prices across Amazon, Home Depot, Leroy Merlin, and eBay. Track prices and get alerts.",
   
   "permissions": [
