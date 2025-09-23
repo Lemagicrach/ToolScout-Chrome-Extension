@@ -383,17 +383,17 @@ document.addEventListener('DOMContentLoaded', () => {
         `✅ Triggered at $${alert.triggeredPrice}` : 
         `⏰ Watching for $${alert.targetPrice}`;
       
-      html += `
-        <div class="alert-item">
-          <button class="delete-alert" data-id="${alert.id}">×</button>
-          <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
-            ${alert.productName}
-          </div>
-          <div style="font-size: 12px; color: var(--text-secondary);">
-            ${statusText} • Created ${new Date(alert.createdAt).toLocaleDateString()}
-          </div>
-        </div>
-      `;
+    html += `
+  <div class="alert-item">
+    <button class="delete-alert" data-id="${alert.id}">×</button>
+    <div class="alert-product-name">
+      ${alert.productName}
+    </div>
+    <div class="alert-product-status">
+      ${statusText} • Created ${new Date(alert.createdAt).toLocaleDateString()}
+    </div>
+  </div>
+`;
     });
     
     alertsList.innerHTML = html;
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const alertId = btn.dataset.id;
         
         // Add rotation animation before delete
-        btn.style.transform = 'rotate(180deg) scale(0)';
+        btn.classList.add('rotating'); // instead of btn.style.transform = ...
         
         setTimeout(async () => {
           await chrome.runtime.sendMessage({ 
@@ -456,30 +456,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Utility Functions
   // =================================================================================================
 
-  function showNotification(message, type) {
-    // Create a temporary notification element
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 20px;
-      background: ${type === 'success' ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' : 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'};
-      color: white;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      z-index: 1000;
-      animation: slideDown 0.3s ease-out;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.style.animation = 'slideUp 0.3s ease-out';
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
+ function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add('slide-up');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
 });
