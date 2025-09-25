@@ -34,7 +34,7 @@
     "https://*.ebay.de/*",
     "https://svcs.ebay.com/*"
   ],
-  
+  "offline_enabled": false,
   "background": {
     "service_worker": "background.js"
   },

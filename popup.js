@@ -1,6 +1,6 @@
 /**
- * ToolScout Popup Script
- * Handles UI interactions and communication with content/background scripts
+ * ToolScout Popup Script - ENHANCED VERSION
+ * Includes Amazon Affiliate Link Integration
  */
 
 // =================================================================================================
@@ -11,6 +11,11 @@ let currentTab = 'search';
 let currentProduct = null;
 let comparisonResults = [];
 let priceAlerts = [];
+let affiliateSettings = {
+    amazonTag: 'toolscout-20',
+    showAffiliateButton: true,
+    enabledPrograms: ['amazon']
+};
 
 // =================================================================================================
 // INITIALIZATION
@@ -18,6 +23,9 @@ let priceAlerts = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[ToolScout] Popup initialized');
+    
+    // Load affiliate settings
+    await loadAffiliateSettings();
     
     // Setup event listeners
     setupTabNavigation();
@@ -32,6 +40,94 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Check if we're on a supported site
     checkCurrentSite();
 });
+
+// =================================================================================================
+// AFFILIATE SETTINGS
+// =================================================================================================
+
+async function loadAffiliateSettings() {
+    try {
+        const settings = await chrome.storage.sync.get({
+            amazonTag: 'toolscout-20',
+            showAffiliateButton: true,
+            enableAmazon: true,
+            enableHomeDepot: true,
+            enableEbay: true,
+            enableLeroyMerlin: true
+        });
+        
+        affiliateSettings.amazonTag = settings.amazonTag;
+        affiliateSettings.showAffiliateButton = settings.showAffiliateButton;
+        affiliateSettings.enabledPrograms = [];
+        
+        if (settings.enableAmazon) affiliateSettings.enabledPrograms.push('amazon');
+        if (settings.enableHomeDepot) affiliateSettings.enabledPrograms.push('homedepot');
+        if (settings.enableEbay) affiliateSettings.enabledPrograms.push('ebay');
+        if (settings.enableLeroyMerlin) affiliateSettings.enabledPrograms.push('leroymerlin');
+        
+    } catch (error) {
+        console.error('[ToolScout] Error loading affiliate settings:', error);
+    }
+}
+
+// =================================================================================================
+// AMAZON AFFILIATE LINK GENERATION
+// =================================================================================================
+
+function generateAmazonAffiliateLink(productUrl, productASIN = null) {
+    // Extract ASIN from URL if not provided
+    if (!productASIN && productUrl) {
+        const asinMatch = productUrl.match(/\/dp\/([A-Z0-9]{10})|\/gp\/product\/([A-Z0-9]{10})/);
+        productASIN = asinMatch ? (asinMatch[1] || asinMatch[2]) : null;
+    }
+    
+    if (!productASIN) {
+        return productUrl; // Return original URL if no ASIN found
+    }
+    
+    // Generate affiliate link with tag
+    const affiliateUrl = `https://www.amazon.com/dp/${productASIN}?tag=${affiliateSettings.amazonTag}`;
+    
+    return affiliateUrl;
+}
+
+// =================================================================================================
+// EBAY PARTNER NETWORK LINK GENERATION
+// =================================================================================================
+
+function generateEbayAffiliateLink(itemUrl) {
+    // eBay Partner Network (EPN) requires a campaign ID
+    // This is a placeholder - you need to register with EPN
+    const campaignId = '5338984293'; // Replace with your actual EPN campaign ID
+    const customId = 'toolscout'; // Custom tracking ID
+    
+    // Create rover link (eBay's redirect service)
+    const roverBase = 'https://rover.ebay.com/rover/1/711-53200-19255-0/1';
+    const params = new URLSearchParams({
+        icep_id: '114',
+        ipn: 'psmain',
+        icep_vectorid: '229466',
+        kwid: '902099',
+        mtid: '824',
+        kw: 'lg',
+        icep_item: '',
+        icep_sellerId: '',
+        icep_ex_kw: '',
+        icep_sortBy: '12',
+        icep_catId: '',
+        icep_minPrice: '',
+        icep_maxPrice: '',
+        ipn: 'psmain',
+        icep_merchantid: '115193',
+        ipn: 'psmain',
+        toolid: '10001',
+        campid: campaignId,
+        customid: customId,
+        mpre: encodeURIComponent(itemUrl)
+    });
+    
+    return `${roverBase}?${params.toString()}`;
+}
 
 // =================================================================================================
 // TAB NAVIGATION
@@ -184,13 +280,21 @@ function displaySearchResults(results) {
     
     comparisonResults = results;
     
-    // Build results HTML
+    // Build results HTML with affiliate links
     let html = '';
     results.forEach((result, index) => {
         const isBestDeal = index === 0;
+        let finalUrl = result.url;
+        
+        // Generate affiliate links based on retailer
+        if (result.retailer === 'amazon' && affiliateSettings.showAffiliateButton) {
+            finalUrl = generateAmazonAffiliateLink(result.url);
+        } else if (result.retailer === 'ebay') {
+            finalUrl = generateEbayAffiliateLink(result.url);
+        }
         
         html += `
-            <div class="result-item slide-in" data-url="${result.url}">
+            <div class="result-item slide-in" data-url="${finalUrl}" data-retailer="${result.retailer}">
                 ${isBestDeal ? '<div class="best-deal">BEST DEAL</div>' : ''}
                 <div class="result-header-row">
                     <span class="retailer-badge retailer-${result.retailer}">
@@ -206,6 +310,8 @@ function displaySearchResults(results) {
                     <span class="detail-badge shipping-badge">
                         📦 ${result.shipping || 'Shipping varies'}
                     </span>
+                    ${result.retailer === 'amazon' || result.retailer === 'ebay' ? 
+                        '<span class="detail-badge affiliate-badge">💰 Affiliate</span>' : ''}
                 </div>
             </div>
         `;
@@ -213,15 +319,55 @@ function displaySearchResults(results) {
     
     resultsList.innerHTML = html;
     
-    // Add click handlers
+    // Add click handlers with tracking
     document.querySelectorAll('.result-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
             const url = item.dataset.url;
+            const retailer = item.dataset.retailer;
+            
+            // Track affiliate click
+            if (retailer === 'amazon' || retailer === 'ebay') {
+                await trackAffiliateClick(retailer, url);
+            }
+            
             if (url) {
                 chrome.tabs.create({ url: url });
             }
         });
     });
+}
+
+// =================================================================================================
+// AFFILIATE CLICK TRACKING
+// =================================================================================================
+
+async function trackAffiliateClick(retailer, url) {
+    try {
+        // Get existing analytics
+        const result = await chrome.storage.local.get('clickAnalytics');
+        const analytics = result.clickAnalytics || [];
+        
+        // Add new click
+        analytics.push({
+            retailer: retailer,
+            url: url,
+            timestamp: Date.now(),
+            productTitle: currentProduct?.title || 'Unknown',
+            affiliateTag: retailer === 'amazon' ? affiliateSettings.amazonTag : 'ebay-partner'
+        });
+        
+        // Keep only last 1000 clicks
+        if (analytics.length > 1000) {
+            analytics.splice(0, analytics.length - 1000);
+        }
+        
+        // Save updated analytics
+        await chrome.storage.local.set({ clickAnalytics: analytics });
+        
+        console.log('[ToolScout] Affiliate click tracked:', retailer);
+    } catch (error) {
+        console.error('[ToolScout] Error tracking click:', error);
+    }
 }
 
 // =================================================================================================
@@ -275,6 +421,11 @@ function updateCurrentProduct(productData) {
         retailerElement.textContent = getRetailerName(productData.retailer);
         retailerElement.className = `retailer-badge retailer-${productData.retailer}`;
         compareButton.disabled = false;
+        
+        // Add Amazon View Deal button if on Amazon
+        if (productData.retailer === 'amazon' && affiliateSettings.showAffiliateButton) {
+            addAmazonAffiliateButton(productData);
+        }
     } else {
         titleElement.textContent = 'No product detected';
         priceElement.textContent = '--';
@@ -282,6 +433,64 @@ function updateCurrentProduct(productData) {
         retailerElement.className = 'retailer-badge';
         compareButton.disabled = true;
     }
+}
+
+// =================================================================================================
+// AMAZON AFFILIATE BUTTON
+// =================================================================================================
+
+function addAmazonAffiliateButton(productData) {
+    // Remove existing button if present
+    const existingButton = document.getElementById('amazonAffiliateButton');
+    if (existingButton) {
+        existingButton.remove();
+    }
+    
+    // Create affiliate button
+    const affiliateButton = document.createElement('a');
+    affiliateButton.id = 'amazonAffiliateButton';
+    affiliateButton.href = generateAmazonAffiliateLink(productData.url);
+    affiliateButton.target = '_blank';
+    affiliateButton.className = 'amazon-affiliate-button';
+    affiliateButton.style.cssText = `
+        display: block;
+        width: calc(100% - 32px);
+        margin: 16px;
+        padding: 14px;
+        background: linear-gradient(135deg, #FF9900 0%, #FF6600 100%);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    `;
+    affiliateButton.innerHTML = '🛒 View Deal on Amazon';
+    
+    // Add click tracking
+    affiliateButton.addEventListener('click', () => {
+        trackAffiliateClick('amazon', affiliateButton.href);
+    });
+    
+    // Insert after compare button
+    const currentProductSection = document.getElementById('currentProductSection');
+    currentProductSection.appendChild(affiliateButton);
+    
+    // Add disclosure
+    const disclosure = document.createElement('div');
+    disclosure.style.cssText = `
+        text-align: center;
+        font-size: 10px;
+        color: #6c7293;
+        margin: -8px 16px 8px;
+        opacity: 0.8;
+    `;
+    disclosure.textContent = 'We earn from qualifying purchases';
+    currentProductSection.appendChild(disclosure);
 }
 
 // =================================================================================================
@@ -359,6 +568,9 @@ function displayPriceAlerts(alerts) {
     
     let html = '';
     alerts.forEach(alert => {
+        const isAmazon = alert.retailer === 'amazon';
+        const isEbay = alert.retailer === 'ebay';
+        
         html += `
             <div class="alert-item" data-id="${alert.id}">
                 <button class="delete-alert" data-id="${alert.id}">×</button>
@@ -367,7 +579,17 @@ function displayPriceAlerts(alerts) {
                     Target: $${alert.targetPrice.toFixed(2)} | 
                     Current: $${(alert.currentPrice || 0).toFixed(2)} | 
                     ${getRetailerName(alert.retailer)}
+                    ${isAmazon || isEbay ? ' | 💰 Affiliate' : ''}
                 </div>
+                ${alert.triggered ? `
+                    <a href="${isAmazon ? generateAmazonAffiliateLink(alert.dealUrl) : 
+                               isEbay ? generateEbayAffiliateLink(alert.dealUrl) : 
+                               alert.dealUrl}" 
+                       target="_blank" 
+                       style="color: #4facfe; font-size: 12px; text-decoration: none; font-weight: 600;">
+                       View Deal →
+                    </a>
+                ` : ''}
             </div>
         `;
     });
@@ -458,3 +680,11 @@ function showNotification(message, type = 'info') {
 window.addEventListener('error', (event) => {
     console.error('[ToolScout] Popup error:', event.error);
 });
+
+// =================================================================================================
+// STARTUP MESSAGE
+// =================================================================================================
+
+console.log('[ToolScout] Popup v2.3.0 loaded with affiliate support');
+console.log('[ToolScout] Amazon Tag:', affiliateSettings.amazonTag);
+console.log('[ToolScout] Affiliate Programs:', affiliateSettings.enabledPrograms);

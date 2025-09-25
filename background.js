@@ -10,7 +10,7 @@
 // =================================================================================================
 
 const CONFIG = {
-  EBAY_APP_ID: 'YOUR_EBAY_APP_ID', // ⚠️ IMPORTANT: Replace with your actual eBay App ID
+  EBAY_APP_ID: 'RachidEl-PriceDro-PRD-157177206-3983f679', // ⚠️ IMPORTANT: Replace with your actual eBay App ID
   MAX_ALERTS: 50,
   CACHE_DURATION: 3600000, // 1 hour in milliseconds
   RETAILERS: ['amazon', 'homedepot', 'leroymerlin', 'ebay']
@@ -662,7 +662,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.action.setBadgeBackgroundColor({
     color: '#667eea'
   });
-  
+
   console.log('[ToolScout] Extension installed/updated');
   
   // Initial price check
