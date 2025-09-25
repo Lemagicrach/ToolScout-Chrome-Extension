@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "ToolScout Pro - Smart Price Tracker",
+  "name": "ToolScout Pro - Smart Tool Price Tracker",
   "version": "2.2.0",
   "description": "Track and compare tool prices across Amazon, Home Depot, Leroy Merlin, and eBay with smart alerts.",
   
@@ -9,7 +9,8 @@
     "notifications",
     "alarms",
     "activeTab",
-    "scripting"
+    "scripting",
+    "contextMenus"
   ],
   
   "host_permissions": [
@@ -20,6 +21,9 @@
     "https://*.amazon.fr/*",
     "https://*.amazon.es/*",
     "https://*.amazon.it/*",
+    "https://*.amazon.com.au/*",
+    "https://*.amazon.co.jp/*",
+    "https://*.amazon.in/*",
     "https://*.homedepot.com/*",
     "https://*.homedepot.ca/*",
     "https://*.leroymerlin.fr/*",
@@ -27,12 +31,12 @@
     "https://*.ebay.ca/*",
     "https://*.ebay.co.uk/*",
     "https://*.ebay.fr/*",
-    "https://*.ebay.de/*"
+    "https://*.ebay.de/*",
+    "https://svcs.ebay.com/*"
   ],
   
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   
   "action": {
@@ -46,6 +50,8 @@
     "default_title": "ToolScout Pro - Click to compare prices"
   },
   
+  "options_page": "options.html",
+  
   "content_scripts": [
     {
       "matches": [
@@ -56,6 +62,9 @@
         "https://*.amazon.fr/*",
         "https://*.amazon.es/*",
         "https://*.amazon.it/*",
+        "https://*.amazon.com.au/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.in/*",
         "https://*.homedepot.com/*",
         "https://*.homedepot.ca/*",
         "https://*.leroymerlin.fr/*",
@@ -81,7 +90,10 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "icons/*"
+        "icons/*",
+        "dashboard.html",
+        "disclosure.html",
+        "privacy_policy.html"
       ],
       "matches": [
         "https://*.amazon.com/*",
@@ -95,5 +107,14 @@
         "https://*.ebay.co.uk/*"
       ]
     }
-  ]
+  ],
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
+  
+  "minimum_chrome_version": "116",
+  
+  "author": "ToolScout Team",
+  "homepage_url": "https://github.com/yourusername/toolscout-extension"
 }

@@ -217,6 +217,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         data: currentProductData 
       });
       break;
+        // Get cached comparison results (FIXED: Added this handler)
+    case 'getComparisonResults':
+      sendResponse({ 
+        success: true, 
+        results: comparisonResults || []
+      });
+      break;
     
     // Price comparison
     case 'comparePrice':

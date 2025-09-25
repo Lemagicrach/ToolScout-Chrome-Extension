@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolScout Options</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --danger: #f56565;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            margin-top: 8px;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-wrapper:hover {
+            background: var(--gray-100);
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-content {
+            flex: 1;
+        }
+
+        .checkbox-label {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .checkbox-description {
+            font-size: 13px;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--gray-500);
+            pointer-events: none;
+        }
+
+        select.form-control {
+            appearance: none;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>🔧</span>
+                <span>ToolScout Options</span>
+            </h1>
+            <p>Customize your price tracking experience</p>
+        </div>
+
+        <div class="content">
+            <div id="saveAlert" class="alert alert-success">
+                ✅ Settings saved successfully!
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>🔔</span>
+                    <span>Alert Preferences</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="alertThreshold">Price Drop Alert Threshold (%)</label>
+                    <input type="number" 
+                           id="alertThreshold" 
+                           class="form-control" 
+                           min="1" 
+                           max="50" 
+                           value="10">
+                    <div class="help-text">Get notified when price drops by this percentage or more</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="checkFrequency">Price Check Frequency</label>
+                    <div class="select-wrapper">
+                        <select id="checkFrequency" class="form-control">
+                            <option value="60">Every Hour</option>
+                            <option value="180">Every 3 Hours</option>
+                            <option value="360" selected>Every 6 Hours</option>
+                            <option value="720">Every 12 Hours</option>
+                            <option value="1440">Daily</option>
+                        </select>
+                    </div>
+                    <div class="help-text">How often to check for price drops</div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="soundAlerts" checked>
+                    <div class="checkbox-content">
+                        <label for="soundAlerts" class="checkbox-label">Sound Notifications</label>
+                        <div class="checkbox-description">Play sound when price drops are detected</div>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="desktopNotifications" checked>
+                    <div class="checkbox-content">
+                        <label for="desktopNotifications" class="checkbox-label">Desktop Notifications</label>
+                        <div class="checkbox-description">Show desktop alerts for price drops</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>🛒</span>
+                    <span>Retailer Settings</span>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="enableAmazon" checked>
+                    <div class="checkbox-content">
+                        <label for="enableAmazon" class="checkbox-label">Amazon</label>
+                        <div class="checkbox-description">Include Amazon in price comparisons</div>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="enableHomeDepot" checked>
+                    <div class="checkbox-content">
+                        <label for="enableHomeDepot" class="checkbox-label">Home Depot</label>
+                        <div class="checkbox-description">Include Home Depot in price comparisons</div>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="enableEbay" checked>
+                    <div class="checkbox-content">
+                        <label for="enableEbay" class="checkbox-label">eBay</label>
+                        <div class="checkbox-description">Include eBay in price comparisons</div>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="enableLeroyMerlin" checked>
+                    <div class="checkbox-content">
+                        <label for="enableLeroyMerlin" class="checkbox-label">Leroy Merlin</label>
+                        <div class="checkbox-description">Include Leroy Merlin in price comparisons</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>📊</span>
+                    <span>Your Statistics</span>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalAlerts">0</div>
+                        <div class="stat-label">Active Alerts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalSavings">$0</div>
+                        <div class="stat-label">Total Savings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="productsTracked">0</div>
+                        <div class="stat-label">Products Tracked</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="priceDrops">0</div>
+                        <div class="stat-label">Price Drops Found</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>🔗</span>
+                    <span>Affiliate Settings</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="amazonTag">Amazon Affiliate Tag</label>
+                    <input type="text" 
+                           id="amazonTag" 
+                           class="form-control" 
+                           placeholder="your-tag-20"
+                           value="toolscout-20">
+                    <div class="help-text">Your Amazon Associates tracking ID</div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="showAffiliateButton" checked>
+                    <div class="checkbox-content">
+                        <label for="showAffiliateButton" class="checkbox-label">Show Amazon Button</label>
+                        <div class="checkbox-description">Display "View on Amazon" affiliate button</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" id="resetBtn">Reset to Defaults</button>
+                <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved settings
+        async function loadSettings() {
+            try {
+                const settings = await chrome.storage.sync.get({
+                    alertThreshold: 10,
+                    checkFrequency: 360,
+                    soundAlerts: true,
+                    desktopNotifications: true,
+                    enableAmazon: true,
+                    enableHomeDepot: true,
+                    enableEbay: true,
+                    enableLeroyMerlin: true,
+                    amazonTag: 'toolscout-20',
+                    showAffiliateButton: true
+                });
+
+                document.getElementById('alertThreshold').value = settings.alertThreshold;
+                document.getElementById('checkFrequency').value = settings.checkFrequency;
+                document.getElementById('soundAlerts').checked = settings.soundAlerts;
+                document.getElementById('desktopNotifications').checked = settings.desktopNotifications;
+                document.getElementById('enableAmazon').checked = settings.enableAmazon;
+                document.getElementById('enableHomeDepot').checked = settings.enableHomeDepot;
+                document.getElementById('enableEbay').checked = settings.enableEbay;
+                document.getElementById('enableLeroyMerlin').checked = settings.enableLeroyMerlin;
+                document.getElementById('amazonTag').value = settings.amazonTag;
+                document.getElementById('showAffiliateButton').checked = settings.showAffiliateButton;
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const stats = await chrome.storage.local.get({
+                    priceAlerts: [],
+                    totalSavings: 0,
+                    productsTracked: 0,
+                    priceDropsFound: 0
+                });
+
+                document.getElementById('totalAlerts').textContent = stats.priceAlerts.length;
+                document.getElementById('totalSavings').textContent = `$${stats.totalSavings.toFixed(2)}`;
+                document.getElementById('productsTracked').textContent = stats.productsTracked;
+                document.getElementById('priceDrops').textContent = stats.priceDropsFound;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Save settings
+        async function saveSettings() {
+            const settings = {
+                alertThreshold: parseInt(document.getElementById('alertThreshold').value),
+                checkFrequency: parseInt(document.getElementById('checkFrequency').value),
+                soundAlerts: document.getElementById('soundAlerts').checked,
+                desktopNotifications: document.getElementById('desktopNotifications').checked,
+                enableAmazon: document.getElementById('enableAmazon').checked,
+                enableHomeDepot: document.getElementById('enableHomeDepot').checked,
+                enableEbay: document.getElementById('enableEbay').checked,
+                enableLeroyMerlin: document.getElementById('enableLeroyMerlin').checked,
+                amazonTag: document.getElementById('amazonTag').value,
+                showAffiliateButton: document.getElementById('showAffiliateButton').checked
+            };
+
+            try {
+                await chrome.storage.sync.set(settings);
+                
+                // Update alarm for price checking
+                chrome.alarms.create('checkPrices', {
+                    periodInMinutes: settings.checkFrequency
+                });
+
+                // Show success message
+                const alert = document.getElementById('saveAlert');
+                alert.classList.add('show');
+                setTimeout(() => {
+                    alert.classList.remove('show');
+                }, 3000);
+            } catch (error) {
+                console.error('Error saving settings:', error);
+            }
+        }
+
+        // Reset to defaults
+        function resetSettings() {
+            if (confirm('Reset all settings to default values?')) {
+                document.getElementById('alertThreshold').value = 10;
+                document.getElementById('checkFrequency').value = 360;
+                document.getElementById('soundAlerts').checked = true;
+                document.getElementById('desktopNotifications').checked = true;
+                document.getElementById('enableAmazon').checked = true;
+                document.getElementById('enableHomeDepot').checked = true;
+                document.getElementById('enableEbay').checked = true;
+                document.getElementById('enableLeroyMerlin').checked = true;
+                document.getElementById('amazonTag').value = 'toolscout-20';
+                document.getElementById('showAffiliateButton').checked = true;
+                saveSettings();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('saveBtn').addEventListener('click', saveSettings);
+        document.getElementById('resetBtn').addEventListener('click', resetSettings);
+
+        // Initialize
+        loadSettings();
+        loadStatistics();
+    </script>
+</body>
+</html>
