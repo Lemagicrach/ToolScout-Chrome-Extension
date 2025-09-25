@@ -662,7 +662,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.action.setBadgeBackgroundColor({
     color: '#667eea'
   });
-
+  
   console.log('[ToolScout] Extension installed/updated');
   
   // Initial price check
