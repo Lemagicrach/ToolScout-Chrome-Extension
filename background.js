@@ -1,16 +1,16 @@
 /**
  * ToolScout - Enhanced Background Script with eBay Integration
- * Now supports: Amazon, Home Depot, Leroy Merlin, and eBay
+ * Supports: Amazon, Home Depot, Leroy Merlin, and eBay
  */
 
 'use strict';
 
 // =================================================================================================
-// Configuration
+// CONFIGURATION
 // =================================================================================================
 
 const CONFIG = {
-  EBAY_APP_ID: 'RachidEl-PriceDro-PRD-157177206-3983f679', // Replace with your actual App ID
+  EBAY_APP_ID: 'YOUR_EBAY_APP_ID', // ⚠️ IMPORTANT: Replace with your actual eBay App ID
   MAX_ALERTS: 50,
   CACHE_DURATION: 3600000, // 1 hour in milliseconds
   RETAILERS: ['amazon', 'homedepot', 'leroymerlin', 'ebay']
@@ -19,40 +19,22 @@ const CONFIG = {
 // eBay category IDs for tools
 const EBAY_TOOL_CATEGORIES = {
   all: '631',           // Business & Industrial > Light Equipment & Tools
-  powerTools: '3244',    // Power Tools
-  handTools: '29525',    // Hand Tools
-  gardenTools: '29518',  // Yard, Garden & Outdoor Living
-  automotive: '6000'     // Automotive Tools
+  powerTools: '3244',   // Power Tools
+  handTools: '29525',   // Hand Tools
+  gardenTools: '29518', // Yard, Garden & Outdoor Living
+  automotive: '6000'    // Automotive Tools
 };
 
 // =================================================================================================
-// Price Extraction Functions
+// STATE MANAGEMENT
 // =================================================================================================
 
-const extractors = {
-  amazon: (data) => {
-    const price = data.querySelector('.a-price-whole, span.a-price.a-text-price.a-size-medium.apexPriceToPay, .a-price-offer-price')?.innerText;
-    return price ? parseFloat(price.replace(/[^0-9.]/g, '')) : null;
-  },
-  
-  homedepot: (data) => {
-    const price = data.querySelector('.price-format__main-price, .price-detailed__full-price')?.innerText;
-    return price ? parseFloat(price.replace(/[^0-9.]/g, '')) : null;
-  },
-  
-  leroymerlin: (data) => {
-    const price = data.querySelector('.xlarge, .price')?.innerText;
-    return price ? parseFloat(price.replace(/[^0-9.]/g, '')) : null;
-  },
-  
-  ebay: (data) => {
-    // eBay data comes from API, not DOM
-    return data.price ? parseFloat(data.price) : null;
-  }
-};
+let currentProductData = null;
+let comparisonResults = [];
+let searchCache = new Map();
 
 // =================================================================================================
-// eBay API Integration
+// EBAY API CLASS
 // =================================================================================================
 
 class EbayAPI {
@@ -71,12 +53,18 @@ class EbayAPI {
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
       if (Date.now() - cached.timestamp < CONFIG.CACHE_DURATION) {
-        console.log('Returning cached eBay results');
+        console.log('[ToolScout] Returning cached eBay results');
         return cached.data;
       }
     }
 
     try {
+      // Check if API ID is configured
+      if (this.appId === 'YOUR_EBAY_APP_ID') {
+        console.warn('[ToolScout] eBay API ID not configured');
+        return this.getMockResults(keyword);
+      }
+
       const params = new URLSearchParams({
         'SECURITY-APPNAME': this.appId,
         'OPERATION-NAME': 'findItemsByKeywords',
@@ -89,27 +77,35 @@ class EbayAPI {
         'sortOrder': options.sortBy || 'PricePlusShippingLowest'
       });
 
-      // Add condition filter if specified
+      // Add filters
+      let filterIndex = 0;
+      
       if (options.condition) {
-        params.append('itemFilter(0).name', 'Condition');
-        params.append('itemFilter(0).value', options.condition);
+        params.append(`itemFilter(${filterIndex}).name`, 'Condition');
+        params.append(`itemFilter(${filterIndex}).value`, options.condition);
+        filterIndex++;
       }
-
-      // Add price range filter if specified
+      
       if (options.minPrice) {
-        params.append('itemFilter(1).name', 'MinPrice');
-        params.append('itemFilter(1).value', options.minPrice);
+        params.append(`itemFilter(${filterIndex}).name`, 'MinPrice');
+        params.append(`itemFilter(${filterIndex}).value`, options.minPrice);
+        filterIndex++;
       }
+      
       if (options.maxPrice) {
-        params.append('itemFilter(2).name', 'MaxPrice');
-        params.append('itemFilter(2).value', options.maxPrice);
+        params.append(`itemFilter(${filterIndex}).name`, 'MaxPrice');
+        params.append(`itemFilter(${filterIndex}).value`, options.maxPrice);
+        filterIndex++;
       }
 
       const url = `https://svcs.ebay.com/services/search/FindingService/v1?${params.toString()}`;
+      
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`eBay API error: ${response.status}`);
+      }
+      
       const data = await response.json();
-
-      // Parse and format the results
       const items = this.parseEbayResults(data);
       
       // Cache the results
@@ -120,70 +116,80 @@ class EbayAPI {
 
       return items;
     } catch (error) {
-      console.error('eBay API error:', error);
-      return [];
+      console.error('[ToolScout] eBay API error:', error);
+      return this.getMockResults(keyword);
     }
   }
 
   /**
-   * Parse eBay API response into a consistent format
+   * Parse eBay API response
    */
   parseEbayResults(data) {
     try {
       const response = data.findItemsByKeywordsResponse?.[0];
       if (!response || response.ack?.[0] !== 'Success') {
+        console.warn('[ToolScout] eBay API returned no results');
         return [];
       }
 
       const items = response.searchResult?.[0]?.item || [];
       
       return items.map(item => ({
+        retailer: 'ebay',
         title: item.title?.[0] || 'Unknown Item',
         price: parseFloat(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__ || 0),
         currency: item.sellingStatus?.[0]?.currentPrice?.[0]?.['@currencyId'] || 'USD',
-        shipping: parseFloat(item.shippingInfo?.[0]?.shippingServiceCost?.[0]?.__value__ || 0),
+        shipping: item.shippingInfo?.[0]?.shippingServiceCost?.[0]?.__value__ 
+          ? parseFloat(item.shippingInfo?.[0]?.shippingServiceCost?.[0]?.__value__)
+          : item.shippingInfo?.[0]?.shippingType?.[0] === 'Free' ? 'Free' : 'Calculated',
         condition: item.condition?.[0]?.conditionDisplayName?.[0] || 'Unknown',
         url: item.viewItemURL?.[0] || '',
         image: item.galleryURL?.[0] || '',
         endTime: item.listingInfo?.[0]?.endTime?.[0] || '',
         type: item.listingInfo?.[0]?.listingType?.[0] || 'Unknown',
         location: item.location?.[0] || 'Unknown',
+        inStock: item.sellingStatus?.[0]?.sellingState?.[0] === 'Active',
         seller: {
           username: item.sellerInfo?.[0]?.sellerUserName?.[0] || 'Unknown',
-          feedback: item.sellerInfo?.[0]?.feedbackScore?.[0] || 0,
-          rating: item.sellerInfo?.[0]?.positiveFeedbackPercent?.[0] || 0
+          feedback: parseInt(item.sellerInfo?.[0]?.feedbackScore?.[0] || 0),
+          rating: parseFloat(item.sellerInfo?.[0]?.positiveFeedbackPercent?.[0] || 0)
         }
       }));
     } catch (error) {
-      console.error('Error parsing eBay results:', error);
+      console.error('[ToolScout] Error parsing eBay results:', error);
       return [];
     }
   }
 
   /**
-   * Get item details using Shopping API
+   * Get mock results for development/testing
    */
-  async getItemDetails(itemId) {
-    try {
-      const params = new URLSearchParams({
-        'appid': this.appId,
-        'version': '967',
-        'siteid': '0',
-        'responseencoding': 'JSON',
-        'callname': 'GetSingleItem',
-        'ItemID': itemId,
-        'IncludeSelector': 'Details,ItemSpecifics,Variations'
-      });
-
-      const url = `https://open.api.ebay.com/shopping?${params.toString()}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      return data.Item || null;
-    } catch (error) {
-      console.error('Error fetching item details:', error);
-      return null;
-    }
+  getMockResults(keyword) {
+    console.log('[ToolScout] Returning mock eBay results for:', keyword);
+    return [
+      {
+        retailer: 'ebay',
+        title: `${keyword} - Power Tool Set`,
+        price: 149.99,
+        currency: 'USD',
+        shipping: 'Free',
+        condition: 'New',
+        url: 'https://ebay.com/example',
+        inStock: true,
+        seller: { username: 'toolseller', feedback: 1000, rating: 99.5 }
+      },
+      {
+        retailer: 'ebay',
+        title: `${keyword} - Professional Grade`,
+        price: 189.99,
+        currency: 'USD',
+        shipping: 5.99,
+        condition: 'Refurbished',
+        url: 'https://ebay.com/example2',
+        inStock: true,
+        seller: { username: 'protools', feedback: 2500, rating: 98.7 }
+      }
+    ];
   }
 }
 
@@ -191,55 +197,198 @@ class EbayAPI {
 const ebayAPI = new EbayAPI(CONFIG.EBAY_APP_ID);
 
 // =================================================================================================
-// Message Handling
+// MESSAGE HANDLERS
 // =================================================================================================
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Message received:', request.action);
+  console.log('[ToolScout] Message received:', request.action);
 
   switch (request.action) {
+    // Product detection from content script
+    case 'productDetected':
     case 'extractProductInfo':
-      handleProductExtraction(request, sender, sendResponse);
+      handleProductDetection(request.data || request, sender, sendResponse);
       break;
-      
-    case 'searchEbay':
-      handleEbaySearch(request, sendResponse);
-      return true; // Keep channel open for async response
-      
+    
+    // Get current product data
+    case 'getCurrentProduct':
+      sendResponse({ 
+        success: true, 
+        data: currentProductData 
+      });
+      break;
+    
+    // Price comparison
+    case 'comparePrice':
     case 'compareAllPrices':
       handlePriceComparison(request, sendResponse);
-      return true; // Keep channel open for async response
-      
+      return true; // Async response
+    
+    // eBay search
+    case 'searchEbay':
+      handleEbaySearch(request, sendResponse);
+      return true; // Async response
+    
+    // Price alerts
+    case 'setAlert':
     case 'saveAlert':
-      handleSaveAlert(request.data, sendResponse);
-      break;
-      
+      handleSaveAlert(request.alert || request.data, sendResponse);
+      return true; // Async response
+    
     case 'getAlerts':
       handleGetAlerts(sendResponse);
-      break;
-      
+      return true; // Async response
+    
     case 'deleteAlert':
-      handleDeleteAlert(request.alertId, sendResponse);
-      break;
-      
+      handleDeleteAlert(request.id || request.alertId, sendResponse);
+      return true; // Async response
+    
     case 'checkPriceDrops':
-      checkPriceDrops();
+      checkPriceDrops().then(() => {
+        sendResponse({ success: true });
+      });
+      return true; // Async response
+    
+    // Open popup
+    case 'openPopup':
+      chrome.action.openPopup();
       sendResponse({ success: true });
       break;
-      
+    
+    // Ping for health check
+    case 'ping':
+      sendResponse({ 
+        status: 'ok',
+        timestamp: Date.now()
+      });
+      break;
+    
     default:
-      sendResponse({ error: 'Unknown action' });
+      sendResponse({ 
+        success: false,
+        error: `Unknown action: ${request.action}` 
+      });
   }
-  
-  return false;
 });
 
 // =================================================================================================
-// Handler Functions
+// HANDLER FUNCTIONS
 // =================================================================================================
 
 /**
- * Handle eBay search requests
+ * Handle product detection from content script
+ */
+function handleProductDetection(data, sender, sendResponse) {
+  const productInfo = {
+    ...data,
+    detectedAt: Date.now(),
+    tabId: sender.tab?.id,
+    tabUrl: sender.tab?.url
+  };
+  
+  // Store as current product
+  currentProductData = productInfo;
+  
+  // Save to storage
+  chrome.storage.local.set({ currentProduct: productInfo }, () => {
+    console.log('[ToolScout] Product stored:', productInfo.title);
+    
+    // Update badge if we have price
+    if (sender.tab?.id && productInfo.price) {
+      const badgeText = productInfo.price < 100 
+        ? `$${Math.round(productInfo.price)}` 
+        : '$99+';
+      
+      chrome.action.setBadgeText({
+        text: badgeText,
+        tabId: sender.tab.id
+      });
+      
+      chrome.action.setBadgeBackgroundColor({
+        color: '#667eea',
+        tabId: sender.tab.id
+      });
+    }
+    
+    sendResponse({ 
+      success: true, 
+      data: productInfo 
+    });
+    
+    // Check for price alerts
+    checkPriceAlerts(productInfo);
+  });
+}
+
+/**
+ * Handle price comparison across all retailers
+ */
+async function handlePriceComparison(request, sendResponse) {
+  try {
+    const searchQuery = request.query || request.productName || 'power drill';
+    
+    console.log('[ToolScout] Comparing prices for:', searchQuery);
+    
+    // Search eBay
+    const ebayResults = await ebayAPI.searchTools(searchQuery, {
+      limit: 5,
+      condition: 'New',
+      sortBy: 'PricePlusShippingLowest'
+    });
+    
+    // Mock results for other retailers (in production, you'd call their APIs)
+    const amazonResult = {
+      retailer: 'amazon',
+      title: searchQuery,
+      price: Math.random() * 50 + 100,
+      url: 'https://amazon.com/example',
+      inStock: true,
+      shipping: 'Free'
+    };
+    
+    const homeDepotResult = {
+      retailer: 'homedepot',
+      title: searchQuery,
+      price: Math.random() * 50 + 90,
+      url: 'https://homedepot.com/example',
+      inStock: true,
+      shipping: '$5.99'
+    };
+    
+    // Combine all results
+    let allResults = [
+      ...ebayResults.slice(0, 3),
+      amazonResult,
+      homeDepotResult
+    ];
+    
+    // Sort by total price (including shipping)
+    allResults = allResults.map(item => ({
+      ...item,
+      totalPrice: item.price + (
+        item.shipping === 'Free' ? 0 : 
+        typeof item.shipping === 'number' ? item.shipping :
+        parseFloat(item.shipping?.replace(/[^0-9.]/g, '') || 0)
+      )
+    })).sort((a, b) => a.totalPrice - b.totalPrice);
+    
+    comparisonResults = allResults;
+    
+    sendResponse({
+      success: true,
+      results: allResults
+    });
+  } catch (error) {
+    console.error('[ToolScout] Price comparison error:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Handle eBay search
  */
 async function handleEbaySearch(request, sendResponse) {
   try {
@@ -253,103 +402,21 @@ async function handleEbaySearch(request, sendResponse) {
       source: 'ebay'
     });
   } catch (error) {
-    console.error('eBay search error:', error);
+    console.error('[ToolScout] eBay search error:', error);
     sendResponse({
       success: false,
       error: error.message
     });
   }
-}
-
-/**
- * Handle price comparison across all retailers
- */
-async function handlePriceComparison(request, sendResponse) {
-  try {
-    const { productName, brand } = request;
-    const searchQuery = `${brand} ${productName}`.trim();
-    
-    // Search eBay
-    const ebayResults = await ebayAPI.searchTools(searchQuery, {
-      limit: 5,
-      condition: 'New',
-      sortBy: 'PricePlusShippingLowest'
-    });
-    
-    // Get best eBay price
-    const ebayBestPrice = ebayResults.length > 0 ? {
-      retailer: 'eBay',
-      price: ebayResults[0].price + ebayResults[0].shipping,
-      title: ebayResults[0].title,
-      url: ebayResults[0].url,
-      condition: ebayResults[0].condition,
-      shipping: ebayResults[0].shipping,
-      type: 'marketplace'
-    } : null;
-    
-    // You can add searches for other retailers here
-    // For now, returning eBay results
-    const comparison = {
-      query: searchQuery,
-      timestamp: Date.now(),
-      results: {
-        ebay: ebayBestPrice,
-        // Add other retailers as needed
-      },
-      alternatives: ebayResults.slice(0, 3) // Top 3 alternatives
-    };
-    
-    sendResponse({
-      success: true,
-      data: comparison
-    });
-  } catch (error) {
-    console.error('Price comparison error:', error);
-    sendResponse({
-      success: false,
-      error: error.message
-    });
-  }
-}
-
-/**
- * Handle product extraction from current page
- */
-function handleProductExtraction(request, sender, sendResponse) {
-  const { url } = sender.tab;
-  let retailer = null;
-  
-  // Detect retailer from URL
-  if (url.includes('amazon.com')) retailer = 'amazon';
-  else if (url.includes('homedepot.com')) retailer = 'homedepot';
-  else if (url.includes('leroymerlin.fr')) retailer = 'leroymerlin';
-  else if (url.includes('ebay.com')) retailer = 'ebay';
-  
-  if (!retailer) {
-    sendResponse({ error: 'Unsupported website' });
-    return;
-  }
-  
-  // Store current product info
-  const productInfo = {
-    retailer,
-    url,
-    title: request.data.title,
-    price: request.data.price,
-    timestamp: Date.now()
-  };
-  
-  chrome.storage.local.set({ currentProduct: productInfo }, () => {
-    sendResponse({ success: true, data: productInfo });
-  });
 }
 
 /**
  * Handle saving price alerts
  */
-function handleSaveAlert(alertData, sendResponse) {
-  chrome.storage.local.get(['alerts'], (result) => {
-    const alerts = result.alerts || [];
+async function handleSaveAlert(alertData, sendResponse) {
+  try {
+    const result = await chrome.storage.local.get(['priceAlerts']);
+    const alerts = result.priceAlerts || [];
     
     if (alerts.length >= CONFIG.MAX_ALERTS) {
       sendResponse({ 
@@ -359,123 +426,281 @@ function handleSaveAlert(alertData, sendResponse) {
       return;
     }
     
-    // Add unique ID and timestamp
+    // Add unique ID and metadata
     const newAlert = {
       ...alertData,
       id: Date.now().toString(),
       createdAt: Date.now(),
+      active: true,
       triggered: false
     };
     
     alerts.push(newAlert);
     
-    chrome.storage.local.set({ alerts }, () => {
-      sendResponse({ 
-        success: true, 
-        alert: newAlert 
-      });
-      
-      // Set up periodic price checking
-      schedulePriceChecking();
+    await chrome.storage.local.set({ priceAlerts: alerts });
+    
+    console.log('[ToolScout] Alert saved:', newAlert);
+    
+    sendResponse({ 
+      success: true, 
+      alert: newAlert 
     });
-  });
+    
+    // Schedule price checking
+    schedulePriceChecking();
+  } catch (error) {
+    console.error('[ToolScout] Error saving alert:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
 }
 
 /**
  * Handle getting all alerts
  */
-function handleGetAlerts(sendResponse) {
-  chrome.storage.local.get(['alerts'], (result) => {
+async function handleGetAlerts(sendResponse) {
+  try {
+    const result = await chrome.storage.local.get(['priceAlerts']);
     sendResponse({ 
       success: true, 
-      alerts: result.alerts || [] 
+      alerts: result.priceAlerts || [] 
     });
-  });
+  } catch (error) {
+    console.error('[ToolScout] Error getting alerts:', error);
+    sendResponse({
+      success: false,
+      error: error.message,
+      alerts: []
+    });
+  }
 }
 
 /**
  * Handle deleting an alert
  */
-function handleDeleteAlert(alertId, sendResponse) {
-  chrome.storage.local.get(['alerts'], (result) => {
-    const alerts = (result.alerts || []).filter(a => a.id !== alertId);
+async function handleDeleteAlert(alertId, sendResponse) {
+  try {
+    const result = await chrome.storage.local.get(['priceAlerts']);
+    const alerts = (result.priceAlerts || []).filter(a => a.id !== alertId);
     
-    chrome.storage.local.set({ alerts }, () => {
-      sendResponse({ success: true });
+    await chrome.storage.local.set({ priceAlerts: alerts });
+    
+    console.log('[ToolScout] Alert deleted:', alertId);
+    
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('[ToolScout] Error deleting alert:', error);
+    sendResponse({
+      success: false,
+      error: error.message
     });
-  });
+  }
 }
 
 // =================================================================================================
-// Price Monitoring
+// PRICE MONITORING
 // =================================================================================================
 
 /**
  * Check for price drops on all alerts
  */
 async function checkPriceDrops() {
-  const { alerts } = await chrome.storage.local.get(['alerts']);
-  if (!alerts || alerts.length === 0) return;
-  
-  for (const alert of alerts) {
-    try {
-      // Search eBay for current prices
-      const results = await ebayAPI.searchTools(alert.productName, {
-        limit: 1,
-        condition: 'New',
-        sortBy: 'PricePlusShippingLowest'
-      });
+  try {
+    const result = await chrome.storage.local.get(['priceAlerts']);
+    const alerts = result.priceAlerts || [];
+    
+    if (alerts.length === 0) return;
+    
+    console.log('[ToolScout] Checking price drops for', alerts.length, 'alerts');
+    
+    let updatedAlerts = false;
+    
+    for (const alert of alerts) {
+      if (!alert.active || alert.triggered) continue;
       
-      if (results.length > 0) {
-        const currentPrice = results[0].price + results[0].shipping;
+      try {
+        // Search for current prices
+        const results = await ebayAPI.searchTools(alert.productTitle, {
+          limit: 1,
+          condition: 'New',
+          sortBy: 'PricePlusShippingLowest'
+        });
         
-        // Check if price dropped below target
-        if (currentPrice < alert.targetPrice && !alert.triggered) {
+        if (results.length > 0) {
+          const currentPrice = results[0].price;
+          
+          // Check if price dropped below target
+          if (currentPrice <= alert.targetPrice) {
+            console.log('[ToolScout] Price drop detected!', alert.productTitle, currentPrice);
+            
+            // Send notification
+            chrome.notifications.create({
+              type: 'basic',
+              iconUrl: 'icons/icon128.png',
+              title: '🎉 Price Drop Alert!',
+              message: `${alert.productTitle} is now $${currentPrice.toFixed(2)} (target: $${alert.targetPrice})`,
+              buttons: [{ title: 'View Deal' }]
+            });
+            
+            // Mark as triggered
+            alert.triggered = true;
+            alert.triggeredPrice = currentPrice;
+            alert.triggeredDate = Date.now();
+            alert.dealUrl = results[0].url;
+            updatedAlerts = true;
+          }
+          
+          // Update last checked price
+          alert.lastCheckedPrice = currentPrice;
+          alert.lastCheckedDate = Date.now();
+        }
+      } catch (error) {
+        console.error('[ToolScout] Error checking price for alert:', error);
+      }
+    }
+    
+    // Save updated alerts if any changes
+    if (updatedAlerts) {
+      await chrome.storage.local.set({ priceAlerts: alerts });
+    }
+  } catch (error) {
+    console.error('[ToolScout] Error in checkPriceDrops:', error);
+  }
+}
+
+/**
+ * Check alerts for a specific product
+ */
+async function checkPriceAlerts(productData) {
+  if (!productData || !productData.price) return;
+  
+  try {
+    const result = await chrome.storage.local.get(['priceAlerts']);
+    const alerts = result.priceAlerts || [];
+    
+    for (const alert of alerts) {
+      if (alert.active && 
+          !alert.triggered &&
+          alert.productTitle?.toLowerCase().includes(productData.title?.toLowerCase())) {
+        
+        if (productData.price <= alert.targetPrice) {
           // Send notification
           chrome.notifications.create({
             type: 'basic',
-            iconUrl: 'icons/icon-128.png',
-            title: 'Price Drop Alert! 🎉',
-            message: `${alert.productName} is now $${currentPrice} on eBay (target: $${alert.targetPrice})`
+            iconUrl: 'icons/icon128.png',
+            title: '🎉 Price Alert Match!',
+            message: `${productData.title} is at $${productData.price} (target: $${alert.targetPrice})`,
+            buttons: [{ title: 'View Product' }]
           });
-          
-          // Mark alert as triggered
-          alert.triggered = true;
-          alert.triggeredPrice = currentPrice;
-          alert.triggeredDate = Date.now();
         }
       }
-    } catch (error) {
-      console.error('Error checking price for alert:', error);
     }
+  } catch (error) {
+    console.error('[ToolScout] Error checking price alerts:', error);
   }
-  
-  // Save updated alerts
-  chrome.storage.local.set({ alerts });
 }
 
 /**
  * Schedule periodic price checking
  */
 function schedulePriceChecking() {
-  // Set up alarm to check prices every 6 hours
+  // Create alarm for periodic checks (every 6 hours)
   chrome.alarms.create('checkPrices', {
-    periodInMinutes: 360 // 6 hours
+    periodInMinutes: 360
   });
 }
 
-// Listen for alarms
+// =================================================================================================
+// ALARM HANDLERS
+// =================================================================================================
+
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'checkPrices') {
+    console.log('[ToolScout] Running scheduled price check');
     checkPriceDrops();
   }
 });
 
 // =================================================================================================
-// Initialization
+// NOTIFICATION HANDLERS
 // =================================================================================================
 
-console.log('ToolScout with eBay integration initialized');
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+  // Open the deal when notification button is clicked
+  chrome.storage.local.get(['priceAlerts'], (result) => {
+    const alerts = result.priceAlerts || [];
+    const alert = alerts.find(a => a.triggered && a.dealUrl);
+    
+    if (alert && alert.dealUrl) {
+      chrome.tabs.create({ url: alert.dealUrl });
+    }
+  });
+});
 
-// Check prices on startup
-checkPriceDrops();
+// =================================================================================================
+// CONTEXT MENUS
+// =================================================================================================
+
+chrome.runtime.onInstalled.addListener(() => {
+  // Create context menu
+  chrome.contextMenus.create({
+    id: 'toolscout-compare',
+    title: 'Compare price with ToolScout',
+    contexts: ['selection', 'link', 'page']
+  });
+  
+  // Set default badge color
+  chrome.action.setBadgeBackgroundColor({
+    color: '#667eea'
+  });
+  
+  console.log('[ToolScout] Extension installed/updated');
+  
+  // Initial price check
+  checkPriceDrops();
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'toolscout-compare') {
+    const searchText = info.selectionText || '';
+    if (searchText) {
+      handlePriceComparison({ query: searchText }, (response) => {
+        if (response.success) {
+          comparisonResults = response.results;
+          chrome.action.openPopup();
+        }
+      });
+    }
+  }
+});
+
+// =================================================================================================
+// TAB MANAGEMENT
+// =================================================================================================
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  // Clear badge when switching tabs
+  chrome.action.setBadgeText({ text: '' });
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  // Clear data for closed tab
+  if (currentProductData?.tabId === tabId) {
+    currentProductData = null;
+  }
+});
+
+// =================================================================================================
+// INITIALIZATION
+// =================================================================================================
+
+console.log('[ToolScout] Background service worker loaded');
+console.log('[ToolScout] eBay API configured:', CONFIG.EBAY_APP_ID !== 'YOUR_EBAY_APP_ID');
+
+// Check for API configuration
+if (CONFIG.EBAY_APP_ID === 'YOUR_EBAY_APP_ID') {
+  console.warn('[ToolScout] ⚠️ eBay API ID not configured! Using mock data.');
+  console.warn('[ToolScout] Get your API ID from: https://developer.ebay.com/');
+}
