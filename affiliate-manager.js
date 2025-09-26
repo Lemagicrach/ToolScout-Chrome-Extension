@@ -8,11 +8,11 @@ class AffiliateManager {
     // Replace these with your actual affiliate IDs
     this.affiliateIds = {
       amazon: {
-        US: 'Toolscout20-20',  // Replace with your Amazon Associates tag
-        UK: 'Toolscout20-21',  // Different tags for different regions
-        CA: 'Toolscout20-22',
-        DE: 'Toolscout20-23',
-        FR: 'Toolscout20-24'
+        US: 'toolscout20-20',  // Replace with your Amazon Associates tag
+        UK: 'toolscout20-21',  // Different tags for different regions
+        CA: 'toolscout20-22',
+        DE: 'toolscout20-23',
+        FR: 'toolscout20-24'
       },
       ebay: {
         campid: 'YOUR_EBAY_CAMPID',  // Your eBay Partner Network Campaign ID
