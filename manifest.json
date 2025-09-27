@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ToolScout Pro - Smart Tool Price Tracker",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Track and compare tool prices across Amazon, Home Depot, Leroy Merlin, and eBay with smart alerts.",
   
   "permissions": [
